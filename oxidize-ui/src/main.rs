@@ -45,7 +45,7 @@ fn App() -> impl IntoView {
 
             {/* BOTTOM FOOTER */}
             <div class="w-full flex justify-center pb-8 shrink-0 relative z-10 pointer-events-auto">
-                <div class="flex gap-3 bg-black bg-opacity-40 p-3 rounded-xl border border-white border-opacity-10 backdrop-blur-md">
+                <div class="flex gap-4">
                     {
                         let themes = ["red", "orange", "yellow", "green", "blue", "purple"];
                         themes.into_iter().map(|t| {
@@ -69,7 +69,7 @@ fn App() -> impl IntoView {
                                             }
                                         }
                                     }
-                                    class=format!("w-10 h-10 clip-pentagon border-2 border-white border-opacity-20 hover:scale-110 hover:brightness-125 transition-all {}", bg)
+                                    class=format!("w-10 h-10 clip-hexagon hover:scale-110 hover:brightness-125 transition-all cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_currentColor] {}", bg)
                                 />
                             }
                         }).collect_view()
