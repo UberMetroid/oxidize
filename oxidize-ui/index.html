@@ -20,7 +20,7 @@
             if (savedTheme) {
                 document.documentElement.className = 'theme-' + savedTheme;
             } else {
-                const themes = ['red', 'orange', 'yellow', 'green', 'blue'];
+                const themes = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
                 const randomTheme = themes[Math.floor(Math.random() * themes.length)];
                 document.documentElement.className = 'theme-' + randomTheme;
                 localStorage.setItem('color-theme', randomTheme);
