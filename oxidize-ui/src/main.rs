@@ -5,14 +5,48 @@ use oxidize_engine::{PlayerState, Faction, UpgradeType};
 #[component]
 fn App() -> impl IntoView {
     let (theme, set_theme) = create_signal("orange".to_string());
-    let (state, set_state) = create_signal(PlayerState::new(Faction::Orange));
+
+    let mut initial_state = if let Some(window) = web_sys::window() {
+        if let Ok(Some(storage)) = window.local_storage() {
+            if let Ok(Some(s)) = storage.get_item("player-state") {
+                serde_json::from_str::<PlayerState>(&s).unwrap_or_else(|_| PlayerState::new(Faction::Orange))
+            } else { PlayerState::new(Faction::Orange) }
+        } else { PlayerState::new(Faction::Orange) }
+    } else { PlayerState::new(Faction::Orange) };
+
+    let now = js_sys::Date::now() as u64;
+    if initial_state.last_sync_time > 0 && now > initial_state.last_sync_time {
+        let delta_seconds = (now - initial_state.last_sync_time) as f64 / 1000.0;
+        initial_state.tick(delta_seconds);
+    }
+    initial_state.last_sync_time = now;
+
+    let (state, set_state) = create_signal(initial_state);
 
     // Game Loop
     create_effect(move |_| {
         let interval = gloo_timers::callback::Interval::new(100, move || {
-            set_state.update(|s| s.tick(0.1));
+            set_state.update(|s| {
+                s.tick(0.1);
+                s.last_sync_time = js_sys::Date::now() as u64;
+            });
         });
         interval.forget(); // Keep it running forever
+    });
+
+    // Autosave Loop
+    create_effect(move |_| {
+        let interval = gloo_timers::callback::Interval::new(2000, move || {
+            let current_state = state.get_untracked();
+            if let Some(window) = web_sys::window() {
+                if let Ok(Some(storage)) = window.local_storage() {
+                    if let Ok(serialized) = serde_json::to_string(&current_state) {
+                        let _ = storage.set_item("player-state", &serialized);
+                    }
+                }
+            }
+        });
+        interval.forget();
     });
 
     create_effect(move |_| {
@@ -89,36 +123,49 @@ fn App() -> impl IntoView {
                     }
                 </div>
 
-                {/* FACTION SELECTOR */}
-                <div class="flex gap-4 mt-2">
-                    {
-                        let themes = ["red", "orange", "yellow", "green", "blue", "purple"];
-                        themes.into_iter().map(|t| {
-                            let bg = match t {
-                                "red" => "bg-red-500",
-                                "orange" => "bg-orange-500",
-                                "yellow" => "bg-yellow-400",
-                                "green" => "bg-green-500",
-                                "blue" => "bg-blue-500",
-                                "purple" => "bg-purple-500",
-                                _ => "bg-gray-500"
-                            };
-                            let t_str = t.to_string();
-                            view! {
-                                <button 
-                                    on:click=move |_| {
-                                        set_theme.set(t_str.clone());
-                                        if let Some(window) = web_sys::window() {
-                                            if let Ok(Some(storage)) = window.local_storage() {
-                                                let _ = storage.set_item("color-theme", &t_str);
+                {/* BOTTOM MENU */}
+                <div class="flex flex-col items-center gap-4">
+                    <div class="flex gap-4">
+                        <button class="px-6 py-2 glass-pad text-sm font-bold tracking-widest hover:scale-105 transition-all text-theme-primary">
+                            "LEADERBOARD"
+                        </button>
+                        <button class="px-6 py-2 glass-pad text-sm font-bold tracking-widest hover:scale-105 transition-all text-theme-primary">
+                            "HOW TO PLAY"
+                        </button>
+                    </div>
+
+                    {/* FACTION SELECTOR */}
+                    <div class="flex gap-4 mt-2">
+                        {
+                            let themes = ["red", "orange", "yellow", "green", "blue", "purple"];
+                            themes.into_iter().map(|t| {
+                                let bg = match t {
+                                    "red" => "bg-red-500",
+                                    "orange" => "bg-orange-500",
+                                    "yellow" => "bg-yellow-400",
+                                    "green" => "bg-green-500",
+                                    "blue" => "bg-blue-500",
+                                    "purple" => "bg-purple-500",
+                                    _ => "bg-gray-500"
+                                };
+                                let t_str = t.to_string();
+                                view! {
+                                    <button 
+                                        on:click=move |_| {
+                                            set_theme.set(t_str.clone());
+                                            set_state.update(|s| s.faction = t_str.parse().unwrap_or_default());
+                                            if let Some(window) = web_sys::window() {
+                                                if let Ok(Some(storage)) = window.local_storage() {
+                                                    let _ = storage.set_item("color-theme", &t_str);
+                                                }
                                             }
                                         }
-                                    }
-                                    class=format!("w-10 h-10 clip-hexagon hover:scale-110 hover:brightness-125 transition-all cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_currentColor] {}", bg)
-                                />
-                            }
-                        }).collect_view()
-                    }
+                                        class=format!("w-10 h-10 clip-hexagon glass-pad bg-opacity-40 hover:bg-opacity-80 hover:scale-110 hover:brightness-125 transition-all cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_currentColor] {}", bg)
+                                    />
+                                }
+                            }).collect_view()
+                        }
+                    </div>
                 </div>
             </div>
         </div>
