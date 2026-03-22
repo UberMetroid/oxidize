@@ -1,9 +1,19 @@
 use leptos::*;
 use wasm_bindgen::JsCast;
+use oxidize_engine::{PlayerState, Faction, UpgradeType};
 
 #[component]
 fn App() -> impl IntoView {
     let (theme, set_theme) = create_signal("orange".to_string());
+    let (state, set_state) = create_signal(PlayerState::new(Faction::Orange));
+
+    // Game Loop
+    create_effect(move |_| {
+        let interval = gloo_timers::callback::Interval::new(100, move || {
+            set_state.update(|s| s.tick(0.1));
+        });
+        interval.forget(); // Keep it running forever
+    });
 
     create_effect(move |_| {
         if let Some(window) = web_sys::window() {
@@ -31,21 +41,56 @@ fn App() -> impl IntoView {
     view! {
         <div class="flex flex-col h-full bg-app-bg text-app-text overflow-hidden transition-all duration-500 relative font-mono">
             {/* TOP HEADER */}
-            <div class="flex flex-col items-center pt-8 relative z-10 pointer-events-none shrink-0">
+            <div class="flex flex-col items-center pt-8 relative z-10 pointer-events-none shrink-0 w-full px-4">
                 <h1 class="text-5xl sm:text-6xl font-black tracking-widest text-theme-primary">
                     "OXIDIZE"
                 </h1>
-                <p class="text-sm sm:text-base mt-2 opacity-70 tracking-widest text-center px-4">
-                    "INITIALIZING THE DYSON PROTOCOL... AWAITING CONSTRUCT."
-                </p>
+                
+                {/* ENERGY METRICS */}
+                <div class="mt-8 flex flex-col items-center p-6 glass-pad w-full max-w-lg pointer-events-auto">
+                    <div class="text-sm uppercase tracking-widest opacity-60">"STORED CAPITAL"</div>
+                    <div class="text-4xl sm:text-5xl font-black text-white mt-1 mb-2">
+                        {move || format!("{:.1} MW", state.get().energy)}
+                    </div>
+                    <div class="text-xs text-theme-primary tracking-wider font-bold">
+                        {move || format!("+ {:.1} MW/s", state.get().energy_per_second())}
+                    </div>
+                </div>
             </div>
 
             {/* MIDDLE (3D SPACE) */}
             <div class="flex-1 pointer-events-none"></div>
 
-            {/* BOTTOM FOOTER */}
-            <div class="w-full flex justify-center pb-8 shrink-0 relative z-10 pointer-events-auto">
-                <div class="flex gap-4">
+            {/* BOTTOM FOOTER / CONTROLS */}
+            <div class="w-full flex flex-col items-center pb-8 shrink-0 relative z-10 pointer-events-auto gap-6">
+                
+                {/* UPGRADE STORE */}
+                <div class="flex flex-col sm:flex-row gap-4 w-full max-w-3xl px-4">
+                    {
+                        let upgrades = vec![UpgradeType::SolarSail, UpgradeType::PlasmaTether, UpgradeType::OrbitalMirror];
+                        upgrades.into_iter().map(move |upgrade| {
+                            let name = upgrade.name();
+                            view! {
+                                <button 
+                                    on:click=move |_| { set_state.update(|s| { s.buy_upgrade(upgrade); }); }
+                                    disabled=move || !state.get().can_afford(upgrade)
+                                    class="flex-1 flex flex-col items-center justify-center p-4 glass-pad hover:scale-[1.02] transition-all disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed group relative overflow-hidden"
+                                >
+                                    <div class="text-xs uppercase opacity-70 mb-1">{name}</div>
+                                    <div class="text-xl font-black text-theme-primary group-disabled:text-white">
+                                        {move || format!("{:.0} MW", upgrade.calculate_cost(state.get().count_for_upgrade(upgrade)))}
+                                    </div>
+                                    <div class="absolute top-2 right-2 text-[10px] font-bold opacity-50">
+                                        {move || state.get().count_for_upgrade(upgrade)}
+                                    </div>
+                                </button>
+                            }
+                        }).collect_view()
+                    }
+                </div>
+
+                {/* FACTION SELECTOR */}
+                <div class="flex gap-4 mt-2">
                     {
                         let themes = ["red", "orange", "yellow", "green", "blue", "purple"];
                         themes.into_iter().map(|t| {
