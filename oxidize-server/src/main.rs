@@ -1,22 +1,33 @@
-use axum::Router;
 use std::net::SocketAddr;
-use tower_http::services::ServeDir;
+use std::path::PathBuf;
+
+use tokio::net::TcpListener;
+use tower_http::cors::{Any, CorsLayer};
+
+use oxidize_server::{create_pool, ensure_data_dir, init_database, create_router, AppState};
 
 #[tokio::main]
-async fn main() {
-    let _ = dotenvy::dotenv().ok();
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let data_dir = PathBuf::from("./data");
+    ensure_data_dir(&data_dir)?;
 
-    let app = Router::new().fallback_service(ServeDir::new("dist"));
+    let database_url = "sqlite://data/oxidize.db";
+    let pool = create_pool(database_url).await?;
+    init_database(&pool).await?;
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:9531")
-        .await
-        .expect("Failed to bind to port 9531");
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods(Any)
+        .allow_headers(Any);
 
-    println!("OXIDIZE SERVER LISTENING ON 9531");
-    axum::serve(
-        listener,
-        app.into_make_service_with_connect_info::<SocketAddr>(),
-    )
-    .await
-    .expect("Server failed to start");
+    let state = AppState { db: pool };
+    let app = create_router(state).layer(cors);
+
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    let listener = TcpListener::bind(addr).await?;
+    println!("Oxidize Server running on http://localhost:3000");
+
+    axum::serve(listener, app).await?;
+
+    Ok(())
 }
