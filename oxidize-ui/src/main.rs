@@ -30,14 +30,22 @@ fn App() -> impl IntoView {
 
     view! {
         <div class="flex flex-col h-full bg-app-bg text-app-text overflow-hidden transition-all duration-500 relative font-mono">
-            <div class="flex flex-col h-full items-center justify-center relative z-10 pointer-events-none">
-                <h1 class="text-6xl font-black tracking-widest text-theme-primary">
+            {/* TOP HEADER */}
+            <div class="flex flex-col items-center pt-8 relative z-10 pointer-events-none shrink-0">
+                <h1 class="text-5xl sm:text-6xl font-black tracking-widest text-theme-primary">
                     "OXIDIZE"
                 </h1>
-                <p class="text-xl mt-4 opacity-70 tracking-widest">
-                    "INITIALIZING THE DYSON PROTOCOL..."
+                <p class="text-sm sm:text-base mt-2 opacity-70 tracking-widest text-center px-4">
+                    "INITIALIZING THE DYSON PROTOCOL... AWAITING CONSTRUCT."
                 </p>
-                <div class="flex gap-2 mt-8 pointer-events-auto">
+            </div>
+
+            {/* MIDDLE (3D SPACE) */}
+            <div class="flex-1 pointer-events-none"></div>
+
+            {/* BOTTOM FOOTER */}
+            <div class="w-full flex justify-center pb-8 shrink-0 relative z-10 pointer-events-auto">
+                <div class="flex gap-3 bg-black bg-opacity-40 p-3 rounded-xl border border-white border-opacity-10 backdrop-blur-md">
                     {
                         let themes = ["red", "orange", "yellow", "green", "blue", "purple"];
                         themes.into_iter().map(|t| {
@@ -61,7 +69,7 @@ fn App() -> impl IntoView {
                                             }
                                         }
                                     }
-                                    class=format!("w-8 h-8 rounded-full border-2 border-white border-opacity-20 hover:scale-110 transition-all {}", bg)
+                                    class=format!("w-10 h-10 clip-pentagon border-2 border-white border-opacity-20 hover:scale-110 hover:brightness-125 transition-all {}", bg)
                                 />
                             }
                         }).collect_view()

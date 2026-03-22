@@ -41,6 +41,10 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+.clip-pentagon {
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+
 /* TEAMS */
 .theme-yellow { --app-bg: #1a1a00; --app-text: #ffffff; --theme-primary: #eab308; --absent-cell-bg-color: #333300; --correct-cell-bg-color: #eab308; --present-cell-bg-color: #f97316; }
 .theme-red { --app-bg: #180000; --app-text: #ffffff; --theme-primary: #ff4444; --absent-cell-bg-color: #2d0000; --correct-cell-bg-color: #ff4444; --present-cell-bg-color: #facc15; }
