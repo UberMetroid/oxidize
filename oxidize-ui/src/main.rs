@@ -1,6 +1,7 @@
 use leptos::*;
 use wasm_bindgen::JsCast;
 use oxidize_engine::{PlayerState, Faction, UpgradeType};
+use three_d::*;
 
 #[component]
 fn App() -> impl IntoView {
@@ -70,6 +71,72 @@ fn App() -> impl IntoView {
                 }
             }
         }
+    });
+
+    // 3D Engine Initialization
+    create_effect(move |_| {
+        leptos::spawn_local(async move {
+            let window = Window::new(WindowSettings {
+                title: "Oxidize".to_string(),
+                max_size: Some((1280, 720)),
+                ..Default::default()
+            }).unwrap();
+            let context = window.gl();
+            
+            let mut camera = Camera::new_perspective(
+                window.viewport(),
+                vec3(0.0, 0.0, 5.0),
+                vec3(0.0, 0.0, 0.0),
+                vec3(0.0, 1.0, 0.0),
+                degrees(45.0),
+                0.1,
+                1000.0,
+            );
+            
+            let mut control = OrbitControl::new(camera.target(), 1.0, 100.0);
+            let mut sphere = Gm::new(
+                Mesh::new(&context, &CpuMesh::sphere(32)),
+                PhysicalMaterial::new_opaque(
+                    &context,
+                    &CpuMaterial {
+                        albedo: Srgba::new(255, 100, 0, 255),
+                        emissive: Srgba::new(255, 50, 0, 255),
+                        ..Default::default()
+                    },
+                ),
+            );
+
+            let ambient = AmbientLight::new(&context, 0.4, Srgba::WHITE);
+            let directional = DirectionalLight::new(&context, 2.0, Srgba::WHITE, vec3(0.0, -1.0, -1.0));
+
+            window.render_loop(move |mut frame_input| {
+                camera.set_viewport(frame_input.viewport);
+                control.handle_events(&mut camera, &mut frame_input.events);
+                
+                sphere.set_transformation(Mat4::from_angle_y(radians((frame_input.accumulated_time * 0.0005) as f32)));
+
+                // Dynamically update color based on the Leptos state
+                let current_theme = theme.get_untracked();
+                let color = match current_theme.as_str() {
+                    "red" => Srgba::new(255, 68, 68, 255),
+                    "orange" => Srgba::new(249, 115, 22, 255),
+                    "yellow" => Srgba::new(234, 179, 8, 255),
+                    "green" => Srgba::new(74, 222, 128, 255),
+                    "blue" => Srgba::new(59, 130, 246, 255),
+                    "purple" => Srgba::new(168, 85, 247, 255),
+                    _ => Srgba::new(255, 100, 0, 255),
+                };
+                sphere.material.albedo = color;
+                sphere.material.emissive = color;
+
+                frame_input.screen().clear(ClearState::color_and_depth(0.0, 0.0, 0.0, 0.0, 1.0)).render(
+                    &camera,
+                    &[&sphere],
+                    &[&ambient, &directional],
+                );
+                FrameOutput::default()
+            });
+        });
     });
 
     view! {
@@ -160,7 +227,7 @@ fn App() -> impl IntoView {
                                                 }
                                             }
                                         }
-                                        class=format!("w-10 h-10 clip-hexagon glass-pad bg-opacity-40 hover:bg-opacity-80 hover:scale-110 hover:brightness-125 transition-all cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_currentColor] {}", bg)
+                                        class=format!("w-10 h-10 rounded-xl glass-pad bg-opacity-40 hover:bg-opacity-80 hover:scale-110 hover:brightness-125 transition-all cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_currentColor] {}", bg)
                                     />
                                 }
                             }).collect_view()
