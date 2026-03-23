@@ -2,7 +2,7 @@ use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::time::Duration;
 
-use axum::{routing::get, routing::post, Router};
+use axum::{routing::get, routing::post, Router, response::{Html, Response}, body::Body};
 use dotenvy::dotenv;
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
@@ -10,7 +10,7 @@ use tower_http::trace::TraceLayer;
 use tracing::{error, info, Level};
 use tracing_subscriber::FmtSubscriber;
 
-use oxidize_server::{create_pool, ensure_data_dir, init_database, AppState};
+use oxidize_server::{create_pool, ensure_data_dir, init_database, AppState, handlers::{sync_player, get_player, get_player_achievements_handler, get_leaderboard, get_global_stats}};
 
 const DEFAULT_PORT: u16 = 7412;
 const DEFAULT_HOST: &str = "0.0.0.0";
@@ -54,6 +54,45 @@ fn get_server_port() -> u16 {
 fn get_log_level() -> Level {
     let level_str = get_env_or_default("RUST_LOG", "info");
     level_str.parse::<Level>().unwrap_or(Level::INFO)
+}
+
+async fn get_index_html() -> Html<&'static str> {
+    Html(include_str!("../../oxidize-ui/dist/index.html"))
+}
+
+async fn serve_js() -> Response<Body> {
+    Response::builder()
+        .header("content-type", "text/javascript")
+        .body(Body::from(include_str!("../../oxidize-ui/dist/oxidize-ui-439bf11cc11dd38f.js")))
+        .unwrap()
+}
+
+async fn serve_wasm() -> Response<Body> {
+    Response::builder()
+        .header("content-type", "application/wasm")
+        .body(Body::from(include_bytes!("../../oxidize-ui/dist/oxidize-ui-439bf11cc11dd38f_bg.wasm").as_ref()))
+        .unwrap()
+}
+
+async fn serve_css() -> Response<Body> {
+    Response::builder()
+        .header("content-type", "text/css")
+        .body(Body::from(include_str!("../../oxidize-ui/dist/tailwind-fd5a060bfa3eb17e.css")))
+        .unwrap()
+}
+
+async fn serve_manifest() -> Response<Body> {
+    Response::builder()
+        .header("content-type", "application/manifest+json")
+        .body(Body::from(include_str!("../../oxidize-ui/dist/manifest.json")))
+        .unwrap()
+}
+
+async fn serve_sw() -> Response<Body> {
+    Response::builder()
+        .header("content-type", "text/javascript")
+        .body(Body::from(include_str!("../../oxidize-ui/dist/sw.js")))
+        .unwrap()
 }
 
 async fn shutdown_signal() {
@@ -122,25 +161,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .max_age(Duration::from_secs(86400));
 
     let app = Router::new()
-        .route("/", get(oxidize_server::handlers::health_check))
-        .route("/health", get(oxidize_server::handlers::health_check))
-        .route("/api/sync", post(oxidize_server::handlers::sync_player))
+        .route("/api/sync", post(sync_player))
         .route(
             "/api/player/:uuid",
-            get(oxidize_server::handlers::get_player),
+            get(get_player),
         )
         .route(
             "/api/player/:uuid/achievements",
-            get(oxidize_server::handlers::get_player_achievements_handler),
+            get(get_player_achievements_handler),
         )
         .route(
             "/api/leaderboard",
-            get(oxidize_server::handlers::get_leaderboard),
+            get(get_leaderboard),
         )
         .route(
             "/api/global-stats",
-            get(oxidize_server::handlers::get_global_stats),
+            get(get_global_stats),
         )
+        .route("/oxidize-ui-439bf11cc11dd38f.js", get(serve_js))
+        .route("/oxidize-ui-439bf11cc11dd38f_bg.wasm", get(serve_wasm))
+        .route("/tailwind-fd5a060bfa3eb17e.css", get(serve_css))
+        .route("/manifest.json", get(serve_manifest))
+        .route("/sw.js", get(serve_sw))
+        .fallback(get_index_html)
         .layer(cors)
         .layer(TraceLayer::new_for_http())
         .with_state(state);

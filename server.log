@@ -1,0 +1,6 @@
+[2m2026-03-23T03:38:13.997891Z[0m [32m INFO[0m No .env file found: path not found
+[2m2026-03-23T03:38:14.050049Z[0m [32m INFO[0m Oxidize Server running on http://0.0.0.0:7412
+[2m2026-03-23T03:38:14.050099Z[0m [32m INFO[0m Health endpoint: http://0.0.0.0:7412/health
+[2m2026-03-23T04:53:31.213977Z[0m [32m INFO[0m Received SIGTERM, initiating graceful shutdown...
+[2m2026-03-23T04:53:31.214133Z[0m [32m INFO[0m Closing database connections...
+[2m2026-03-23T04:53:31.214147Z[0m [32m INFO[0m Shutdown complete.

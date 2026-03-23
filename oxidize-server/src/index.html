@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <title>OXIDIZE</title>
+    <link rel="stylesheet" href="/tailwind-fd5a060bfa3eb17e.css" integrity="sha384-PGBTBY5fBrT+L34SbUm2xTrAMtzvuM4dWlXYzaMIuIsy0qbmhrexdSYBSKHLsvsm"/>
+    
+    
+    
+    <link rel="manifest" href="/manifest.json">
+    <script>
+        // BLOCKING THEME INITIALIZATION
+        (function() {
+            const savedTheme = localStorage.getItem('color-theme');
+            if (savedTheme) {
+                document.documentElement.className = 'theme-' + savedTheme;
+            } else {
+                const themes = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+                const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+                document.documentElement.className = 'theme-' + randomTheme;
+                localStorage.setItem('color-theme', randomTheme);
+            }
+        })();
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(error => {
+                    console.log('ServiceWorker registration failed: ', error);
+                });
+            });
+        }
+    </script>
+<link rel="modulepreload" href="/oxidize-ui-439bf11cc11dd38f.js" crossorigin="anonymous" integrity="sha384-SXNi4xgunL+0FfgfCMg+68SBgEKkgHyqSKDK33FQnw0AjZ5nxtmZ6i396UM4jGXE"><link rel="preload" href="/oxidize-ui-439bf11cc11dd38f_bg.wasm" crossorigin="anonymous" integrity="sha384-A5dZ2D8ddZlTpOXzcFu5nDSNacJXqT2dQZPuZnl8R3aamRyzZm1UCWHlsLsUigt+" as="fetch" type="application/wasm"></head>
+<body class="bg-app-bg transition-colors duration-500 overflow-hidden fixed inset-0">
+    <div id="root" class="absolute inset-0 z-10 w-full h-full"></div>
+
+<script type="module">
+import init, * as bindings from '/oxidize-ui-439bf11cc11dd38f.js';
+const wasm = await init({ module_or_path: '/oxidize-ui-439bf11cc11dd38f_bg.wasm' });
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script></body>
+</html>

@@ -34,6 +34,7 @@ oxidize-ui/tests/
 # Tests
 **/tests/
 **/benches/
+!oxidize-engine/benches/
 
 # OS artifacts
 .DS_Store
