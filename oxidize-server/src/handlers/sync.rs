@@ -30,16 +30,14 @@ pub async fn sync_player(
 
     sqlx::query(
         r#"
-        INSERT INTO players (uuid, faction, last_seen_at, consecutive_days)
-        VALUES (?1, ?2, ?3, ?4)
+        INSERT INTO players (uuid, last_seen_at, consecutive_days)
+        VALUES (?1, ?2, ?3)
         ON CONFLICT(uuid) DO UPDATE SET
-            faction = excluded.faction,
             last_seen_at = excluded.last_seen_at,
             consecutive_days = excluded.consecutive_days
         "#,
     )
     .bind(&payload.uuid)
-    .bind(format!("{:?}", payload.state.faction).to_lowercase())
     .bind(now_seconds)
     .bind(new_consecutive_days as i64)
     .execute(&state.db)

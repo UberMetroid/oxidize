@@ -1,5 +1,5 @@
 use gloo_net::http::Request as GlooRequest;
-use oxidize_engine::{Achievement, Faction, PlayerState};
+use oxidize_engine::{Achievement, PlayerState};
 use serde::{Deserialize, Serialize};
 
 const API_BASE: &str = "http://localhost:7412";
@@ -29,7 +29,6 @@ pub struct AchievementInfo {
 pub struct LeaderboardEntry {
     pub rank: i64,
     pub uuid: String,
-    pub faction: Faction,
     pub total_energy: f64,
     pub solar_sails: u32,
     pub plasma_tethers: u32,

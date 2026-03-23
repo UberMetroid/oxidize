@@ -3,16 +3,12 @@
 //! Handles the player's energy, upgrades, and progression.
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
 
-use crate::achievements::Achievement;
-use crate::factions::calculate_meditation_bonus;
-use crate::types::{Faction, UpgradeType};
+use crate::types::UpgradeType;
 
 /// Represents a player's current game state.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct PlayerState {
-    pub faction: Faction,
     pub energy: f64,
     pub total_energy_generated: f64,
     pub solar_sails: u32,
@@ -24,17 +20,12 @@ pub struct PlayerState {
     pub last_sync_time: u64,
     pub last_synced_total_energy: f64,
     pub last_purchase_time: u64,
-    #[serde(default)]
-    pub achievements: HashSet<Achievement>,
-    #[serde(default)]
-    pub consecutive_days: u32,
 }
 
 impl PlayerState {
     /// Creates a new PlayerState with default values.
-    pub fn new(faction: Faction) -> Self {
+    pub fn new() -> Self {
         Self {
-            faction,
             energy: 0.0,
             total_energy_generated: 0.0,
             solar_sails: 0,
@@ -46,8 +37,6 @@ impl PlayerState {
             last_sync_time: 0,
             last_synced_total_energy: 0.0,
             last_purchase_time: 0,
-            achievements: HashSet::new(),
-            consecutive_days: 1,
         }
     }
 
@@ -96,19 +85,9 @@ impl PlayerState {
     }
 
     /// Advances the simulation by delta_seconds, adding generated energy.
-    pub fn tick(&mut self, delta_seconds: f64, current_time: u64) {
+    pub fn tick(&mut self, delta_seconds: f64, _current_time: u64) {
         let eps = self.energy_per_second();
-        let mut generated = eps * delta_seconds;
-
-        if self.faction == Faction::Green {
-            let idle_seconds = if self.last_purchase_time > 0 {
-                (current_time - self.last_purchase_time) as f64 / 1000.0
-            } else {
-                0.0
-            };
-            generated +=
-                calculate_meditation_bonus(self.energy, idle_seconds) * delta_seconds / 60.0;
-        }
+        let generated = eps * delta_seconds;
 
         self.energy += generated;
         self.total_energy_generated += generated;
