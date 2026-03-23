@@ -1,0 +1,48 @@
+# =============================================================================
+# Oxidize - Docker Compose Configuration
+# =============================================================================
+# Production-grade compose file for Synology NAS / Unraid deployment
+# =============================================================================
+
+services:
+  oxidize:
+    image: ghcr.io/ubermetroid/oxidize:latest
+    container_name: oxidize
+    restart: unless-stopped
+    ports:
+      - "${PORT:-7412}:7412"
+    volumes:
+      - ${DATA_DIR:-./data}:/app/data
+    environment:
+      - HOST=0.0.0.0
+      - PORT=7412
+      - DATA_DIR=/app/data
+      - RUST_LOG=${RUST_LOG:-info}
+      - TZ=${TZ:-UTC}
+    user: "${PUID:-1000}:${PGID:-1000}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7412/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '${CPU_LIMIT:-1.0}'
+          memory: '${MEMORY_LIMIT:-512M}'
+        reservations:
+          cpus: '${CPU_RESERVE:-0.25}'
+          memory: '${MEMORY_RESERVE:-128M}'
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp:size=64m

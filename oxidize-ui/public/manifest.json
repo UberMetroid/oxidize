@@ -1,7 +1,7 @@
 {
-  "name": "RUSTLE",
-  "short_name": "RUSTLE",
-  "description": "A high-performance, adversarial WebAssembly Wordle clone.",
+  "name": "Oxidize",
+  "short_name": "Oxidize",
+  "description": "Incremental game of cosmic capital. Build a Dyson Sphere around a decaying star.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

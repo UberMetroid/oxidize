@@ -54,6 +54,9 @@ pub enum UpgradeType {
     SolarSail,
     PlasmaTether,
     OrbitalMirror,
+    DysonCollector,
+    QuantumArray,
+    StellarEngine,
 }
 
 impl UpgradeType {
@@ -63,6 +66,9 @@ impl UpgradeType {
             UpgradeType::SolarSail => 10.0,
             UpgradeType::PlasmaTether => 500.0,
             UpgradeType::OrbitalMirror => 15000.0,
+            UpgradeType::DysonCollector => 500000.0,
+            UpgradeType::QuantumArray => 20000000.0,
+            UpgradeType::StellarEngine => 1000000000.0,
         }
     }
 
@@ -72,12 +78,32 @@ impl UpgradeType {
             UpgradeType::SolarSail => 1.0,
             UpgradeType::PlasmaTether => 25.0,
             UpgradeType::OrbitalMirror => 1000.0,
+            UpgradeType::DysonCollector => 50000.0,
+            UpgradeType::QuantumArray => 2000000.0,
+            UpgradeType::StellarEngine => 100000000.0,
         }
     }
 
     /// Cost multiplier for exponential scaling (1.15 = 15% increase per owned).
     pub fn cost_multiplier(&self) -> f64 {
         1.15
+    }
+
+    /// Total energy generated required to unlock this upgrade.
+    pub fn unlock_threshold(&self) -> f64 {
+        match self {
+            UpgradeType::SolarSail => 0.0,
+            UpgradeType::PlasmaTether => 0.0,
+            UpgradeType::OrbitalMirror => 0.0,
+            UpgradeType::DysonCollector => 1_000_000.0,
+            UpgradeType::QuantumArray => 100_000_000.0,
+            UpgradeType::StellarEngine => 10_000_000_000.0,
+        }
+    }
+
+    /// Whether this upgrade is currently unlocked based on total energy generated.
+    pub fn is_unlocked(&self, total_energy_generated: f64) -> bool {
+        total_energy_generated >= self.unlock_threshold()
     }
 
     /// Calculates the cost for purchasing this upgrade given current owned count.
@@ -91,6 +117,9 @@ impl UpgradeType {
             UpgradeType::SolarSail => "Solar Sail",
             UpgradeType::PlasmaTether => "Plasma Tether",
             UpgradeType::OrbitalMirror => "Orbital Mirror",
+            UpgradeType::DysonCollector => "Dyson Collector",
+            UpgradeType::QuantumArray => "Quantum Array",
+            UpgradeType::StellarEngine => "Stellar Engine",
         }
     }
 
@@ -106,6 +135,33 @@ impl UpgradeType {
             UpgradeType::OrbitalMirror => {
                 "Massive geometric structures focusing the star's output into pure raw capital."
             }
+            UpgradeType::DysonCollector => {
+                "Orbital megastructures harvesting stellar wind directly from the photosphere."
+            }
+            UpgradeType::QuantumArray => {
+                "Quantum coherence arrays that tap into zero-point energy fluctuations."
+            }
+            UpgradeType::StellarEngine => {
+                "Dyson-Harberman engines that siphon a fraction of the star's core output."
+            }
         }
+    }
+
+    /// Returns all basic upgrades (always visible).
+    pub fn basic_upgrades() -> Vec<UpgradeType> {
+        vec![
+            UpgradeType::SolarSail,
+            UpgradeType::PlasmaTether,
+            UpgradeType::OrbitalMirror,
+        ]
+    }
+
+    /// Returns all advanced upgrades (require thresholds).
+    pub fn advanced_upgrades() -> Vec<UpgradeType> {
+        vec![
+            UpgradeType::DysonCollector,
+            UpgradeType::QuantumArray,
+            UpgradeType::StellarEngine,
+        ]
     }
 }

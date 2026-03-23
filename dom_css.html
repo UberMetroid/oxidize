@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="en" class="theme-orange"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <title>OXIDIZE</title>
+    <link rel="stylesheet" href="/tailwind-e4f4276bbda5df36.css" integrity="sha384-VBw0O6E0ZjNUUDDJbNQcSYQgBtd9TeJjSBZxnVYZjFlP6W6CpwrSI6+gj7tunFMJ">
+    
+    
+    
+    <link rel="manifest" href="/manifest.json">
+    <script>
+        // BLOCKING THEME INITIALIZATION
+        (function() {
+            const savedTheme = localStorage.getItem('color-theme');
+            if (savedTheme) {
+                document.documentElement.className = 'theme-' + savedTheme;
+            } else {
+                const themes = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+                const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+                document.documentElement.className = 'theme-' + randomTheme;
+                localStorage.setItem('color-theme', randomTheme);
+            }
+        })();
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(error => {
+                    console.log('ServiceWorker registration failed: ', error);
+                });
+            });
+        }
+    </script>
+<link rel="modulepreload" href="/oxidize-ui-fe35d2d78bd62228.js" crossorigin="anonymous" integrity="sha384-w/gwlfxGR2avoO6yxWvKsQ6Q3yfjMjkWT7ud9lSXZY+HbZKUBvUhZ9ZNrZdYMMBi"><link rel="preload" href="/oxidize-ui-fe35d2d78bd62228_bg.wasm" crossorigin="anonymous" integrity="sha384-Qu/i0INcYWK9Q9j4D6yFcCnf8BKGk1BoeNDNq0ZYxC/DPEVA98y5zH1UjZC1wdJX" as="fetch" type="application/wasm"></head>
+<body class="bg-black overflow-hidden fixed inset-0">
+    <div id="root"><div class="flex flex-col h-full bg-app-bg text-app-text overflow-hidden transition-all duration-500 relative font-mono"><!----><div class="flex flex-col items-center pt-8 relative z-10 pointer-events-none shrink-0 w-full px-4"><h1 class="text-5xl sm:text-6xl font-black tracking-widest text-theme-primary">OXIDIZE</h1><!----><div class="mt-8 flex flex-col items-center p-6 glass-pad w-full max-w-lg pointer-events-auto"><div class="text-sm uppercase tracking-widest opacity-60">STORED CAPITAL</div><div class="text-4xl sm:text-5xl font-black text-white mt-1 mb-2">0.4 MW<!----></div><div class="text-xs text-theme-primary tracking-wider font-bold">+ 1.0 MW/s<!----></div></div></div><!----><div class="flex-1 pointer-events-none"></div><!----><div class="w-full flex flex-col items-center pb-8 shrink-0 relative z-10 pointer-events-auto gap-6"><!----><div class="flex flex-col sm:flex-row gap-4 w-full max-w-3xl px-4"><button disabled="disabled" class="flex-1 flex flex-col items-center justify-center p-4 glass-pad hover:scale-[1.02] transition-all disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed group relative overflow-hidden"><div class="text-xs uppercase opacity-70 mb-1">Solar Sail</div><div class="text-xl font-black text-theme-primary group-disabled:text-white">10 MW<!----></div><div class="absolute top-2 right-2 text-[10px] font-bold opacity-50">0<!----></div></button><button disabled="disabled" class="flex-1 flex flex-col items-center justify-center p-4 glass-pad hover:scale-[1.02] transition-all disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed group relative overflow-hidden"><div class="text-xs uppercase opacity-70 mb-1">Plasma Tether</div><div class="text-xl font-black text-theme-primary group-disabled:text-white">500 MW<!----></div><div class="absolute top-2 right-2 text-[10px] font-bold opacity-50">0<!----></div></button><button disabled="disabled" class="flex-1 flex flex-col items-center justify-center p-4 glass-pad hover:scale-[1.02] transition-all disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed group relative overflow-hidden"><div class="text-xs uppercase opacity-70 mb-1">Orbital Mirror</div><div class="text-xl font-black text-theme-primary group-disabled:text-white">15000 MW<!----></div><div class="absolute top-2 right-2 text-[10px] font-bold opacity-50">0<!----></div></button><!----></div><!----><div class="flex flex-col items-center gap-4"><div class="flex gap-4"><button class="px-6 py-2 glass-pad text-sm font-bold tracking-widest hover:scale-105 transition-all text-theme-primary">LEADERBOARD</button><button class="px-6 py-2 glass-pad text-sm font-bold tracking-widest hover:scale-105 transition-all text-theme-primary">HOW TO PLAY</button></div><!----><div class="flex gap-4 mt-2"><button class="w-10 h-10 rounded-xl glass-pad bg-opacity-40 hover:bg-opacity-80 hover:scale-110 hover:brightness-125 transition-all cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_currentColor] bg-red-500"></button><button class="w-10 h-10 rounded-xl glass-pad bg-opacity-40 hover:bg-opacity-80 hover:scale-110 hover:brightness-125 transition-all cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_currentColor] bg-orange-500"></button><button class="w-10 h-10 rounded-xl glass-pad bg-opacity-40 hover:bg-opacity-80 hover:scale-110 hover:brightness-125 transition-all cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_currentColor] bg-yellow-400"></button><button class="w-10 h-10 rounded-xl glass-pad bg-opacity-40 hover:bg-opacity-80 hover:scale-110 hover:brightness-125 transition-all cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_currentColor] bg-green-500"></button><button class="w-10 h-10 rounded-xl glass-pad bg-opacity-40 hover:bg-opacity-80 hover:scale-110 hover:brightness-125 transition-all cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_currentColor] bg-blue-500"></button><button class="w-10 h-10 rounded-xl glass-pad bg-opacity-40 hover:bg-opacity-80 hover:scale-110 hover:brightness-125 transition-all cursor-pointer shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_currentColor] bg-purple-500"></button><!----></div></div></div></div><!----></div>
+    <canvas id="three-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-100" tabindex="0" data-raw-handle="1" width="1280" height="720" alt="Oxidize" style="width: 1280px; height: 720px;"></canvas>
+
+<script type="module">
+import init, * as bindings from '/oxidize-ui-fe35d2d78bd62228.js';
+const wasm = await init({ module_or_path: '/oxidize-ui-fe35d2d78bd62228_bg.wasm' });
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script>
+
+</body></html>

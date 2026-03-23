@@ -1,7 +1,16 @@
 use axum::extract::State;
+use serde::Serialize;
 
+use crate::db::get_player_achievements;
+use crate::models::{AchievementInfo, GlobalStatsResponse};
 use crate::AppState;
-use crate::models::GlobalStatsResponse;
+
+#[derive(Serialize)]
+pub struct HealthResponse {
+    pub status: String,
+    pub database: String,
+    pub version: String,
+}
 
 pub async fn get_global_stats(
     State(state): State<AppState>,
@@ -31,6 +40,36 @@ pub async fn get_global_stats(
     }))
 }
 
-pub async fn health_check() -> &'static str {
-    "Oxidize Server Alive"
+pub async fn health_check(State(state): State<AppState>) -> axum::Json<HealthResponse> {
+    let db_status = sqlx::query("SELECT 1")
+        .fetch_one(&state.db)
+        .await
+        .map(|_| "connected")
+        .unwrap_or_else(|_| "disconnected");
+
+    axum::Json(HealthResponse {
+        status: "ok".to_string(),
+        database: db_status.to_string(),
+        version: env!("CARGO_PKG_VERSION").to_string(),
+    })
+}
+
+pub async fn get_player_achievements_handler(
+    State(state): State<AppState>,
+    axum::extract::Path(uuid): axum::extract::Path<String>,
+) -> Result<axum::Json<Vec<AchievementInfo>>, axum::http::StatusCode> {
+    let achievements = get_player_achievements(&state.db, &uuid)
+        .await
+        .map_err(|_| axum::http::StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let infos: Vec<AchievementInfo> = achievements
+        .iter()
+        .map(|a| AchievementInfo {
+            name: a.name().to_string(),
+            description: a.description().to_string(),
+            achievement: *a,
+        })
+        .collect();
+
+    Ok(axum::Json(infos))
 }

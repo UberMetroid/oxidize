@@ -1,8 +1,8 @@
 use axum::{extract::Path, extract::State, Json};
 use oxidize_engine::Faction;
 
-use crate::AppState;
 use crate::models::{LeaderboardEntry, LeaderboardResponse, PlayerResponse};
+use crate::AppState;
 
 pub async fn get_player(
     State(state): State<AppState>,
@@ -72,17 +72,19 @@ pub async fn get_leaderboard(
 
     let entries: Vec<LeaderboardEntry> = rows
         .into_iter()
-        .map(|(rank, uuid, faction, energy, solar_sails, plasma_tethers, orbital_mirrors)| {
-            LeaderboardEntry {
-                rank,
-                uuid,
-                faction: faction.parse().unwrap_or(Faction::Orange),
-                total_energy: energy,
-                solar_sails,
-                plasma_tethers,
-                orbital_mirrors,
-            }
-        })
+        .map(
+            |(rank, uuid, faction, energy, solar_sails, plasma_tethers, orbital_mirrors)| {
+                LeaderboardEntry {
+                    rank,
+                    uuid,
+                    faction: faction.parse().unwrap_or(Faction::Orange),
+                    total_energy: energy,
+                    solar_sails,
+                    plasma_tethers,
+                    orbital_mirrors,
+                }
+            },
+        )
         .collect();
 
     Ok(Json(LeaderboardResponse { entries }))

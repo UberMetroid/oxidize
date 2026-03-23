@@ -1,0 +1,39 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Run Tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev pkg-config
+
+      - name: Run engine unit tests
+        run: cargo test --package oxidize-engine
+
+      - name: Run server integration tests
+        run: cargo test --package oxidize-server
+
+      - name: Check code formatting
+        run: |
+          rustfmt --check --edition 2021 oxidize-*/src/**/*.rs || true
+
+      - name: Build release
+        run: cargo build --release --all

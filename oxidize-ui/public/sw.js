@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rustle-v2-2-0';
+const CACHE_NAME = 'oxidize-v1-0-0';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -32,8 +32,8 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Don't cache API calls
-  if (event.request.url.includes('/api/score') || event.request.url.includes('/global-stats.json')) {
+  const url = event.request.url;
+  if (url.includes('/api/')) {
     return;
   }
 
@@ -46,15 +46,12 @@ self.addEventListener('fetch', (event) => {
         if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
           return networkResponse;
         }
-        
-        // Cache Wasm and JS bundles dynamically
-        if (event.request.url.includes('.wasm') || event.request.url.includes('.js') || event.request.url.includes('.css')) {
+        if (url.includes('.wasm') || url.includes('.js') || url.includes('.css')) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
         }
-        
         return networkResponse;
       });
     })

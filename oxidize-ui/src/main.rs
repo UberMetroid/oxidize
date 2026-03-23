@@ -2,9 +2,10 @@ mod api;
 mod components;
 
 use leptos::*;
-use wasm_bindgen::JsCast;
 use oxidize_engine::architect::{generate_quip, QuipTrigger};
+use oxidize_engine::factions::get_sync_interval;
 use oxidize_engine::{Faction, PlayerState, UpgradeType};
+use wasm_bindgen::JsCast;
 
 fn get_player_uuid() -> String {
     if let Some(window) = web_sys::window() {
@@ -32,20 +33,11 @@ fn load_state() -> PlayerState {
     PlayerState::new(Faction::Orange)
 }
 
-fn calculate_offline_progress(mut state: PlayerState) -> PlayerState {
-    let now = js_sys::Date::now() as u64;
-    if state.last_sync_time > 0 && now > state.last_sync_time {
-        let delta_seconds = (now - state.last_sync_time) as f64 / 1000.0;
-        state.tick(delta_seconds);
-    }
-    state.last_sync_time = now;
-    state
-}
-
 #[component]
 fn App() -> impl IntoView {
     let player_uuid = get_player_uuid();
-    let initial_state = calculate_offline_progress(load_state());
+    let mut initial_state = load_state();
+    initial_state.calculate_offline_progress(js_sys::Date::now() as u64);
 
     let (state, set_state) = create_signal(initial_state);
     let (theme, set_theme) = create_signal("orange".to_string());
@@ -55,6 +47,8 @@ fn App() -> impl IntoView {
     let (leaderboard_entries, set_leaderboard_entries) = create_signal(Vec::new());
     let (architect_message, set_architect_message) = create_signal(None as Option<String>);
     let (global_stats, set_global_stats) = create_signal(None as Option<api::GlobalStats>);
+    let (show_achievements, set_show_achievements) = create_signal(false);
+    let (achievement_list, set_achievement_list) = create_signal(Vec::new());
 
     let (last_purchase_time, set_last_purchase_time) = create_signal(0u64);
     let (architect_faction, set_architect_faction) = create_signal(Faction::Orange);
@@ -84,9 +78,10 @@ fn App() -> impl IntoView {
 
     create_effect(move |_| {
         let interval = gloo_timers::callback::Interval::new(100, move || {
+            let current_time = js_sys::Date::now() as u64;
             set_state.update(|s| {
-                s.tick(0.1);
-                s.last_sync_time = js_sys::Date::now() as u64;
+                s.tick(0.1, current_time);
+                s.last_sync_time = current_time;
             });
         });
         interval.forget();
@@ -94,7 +89,8 @@ fn App() -> impl IntoView {
 
     create_effect(move |_| {
         let uuid = player_uuid.clone();
-        let interval = gloo_timers::callback::Interval::new(2000, move || {
+        let sync_interval = get_sync_interval(architect_faction.get());
+        let interval = gloo_timers::callback::Interval::new(sync_interval, move || {
             let mut current_state = state.get();
             current_state.last_synced_total_energy = current_state.total_energy_generated;
             if let Some(window) = web_sys::window() {
@@ -107,7 +103,15 @@ fn App() -> impl IntoView {
             let uuid_clone = uuid.clone();
             let state_clone = current_state.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let _ = api::sync_state(&uuid_clone, &state_clone).await;
+                match api::sync_state(&uuid_clone, &state_clone).await {
+                    Ok(response) => {
+                        if !response.newly_unlocked_achievements.is_empty() {
+                            set_achievement_list.set(response.newly_unlocked_achievements);
+                            set_show_achievements.set(true);
+                        }
+                    }
+                    Err(_) => {}
+                }
             });
         });
         interval.forget();
@@ -128,8 +132,10 @@ fn App() -> impl IntoView {
     });
 
     let buy_upgrade = move |upgrade: UpgradeType| {
-        set_state.update(|s| { s.buy_upgrade(upgrade); });
         let current_time = js_sys::Date::now() as u64;
+        set_state.update(|s| {
+            s.buy_upgrade(upgrade, current_time);
+        });
         set_last_purchase_time.set(current_time);
         let faction = architect_faction.get();
         let quip = generate_quip(faction, QuipTrigger::Purchase(upgrade));
@@ -140,7 +146,7 @@ fn App() -> impl IntoView {
         <div class="flex flex-col h-full bg-transparent text-app-text overflow-hidden transition-all duration-500 font-mono">
             <components::GameHeader state={state}/>
 
-            <components::NeonOrb/>
+            <components::NeonOrb intensity={Some(state.get().energy_per_second() as i32)}/>
 
             <div class="w-full flex flex-col items-center pb-8 shrink-0 relative z-10 pointer-events-auto gap-6">
                 <components::UpgradePanel state={state} on_buy={Callback::from(buy_upgrade)}/>
@@ -179,16 +185,23 @@ fn App() -> impl IntoView {
             </div>
 
             <Show when={move || architect_message.get().is_some()}>
-                <components::ArchitectToast 
+                <components::ArchitectToast
                     message={architect_message.get().unwrap_or_default()}
                     on_close={Callback::from(move |_| set_architect_message.set(None))}
                 />
             </Show>
 
+            <Show when={move || show_achievements.get()}>
+                <components::AchievementToast
+                    achievements={achievement_list.get()}
+                    on_close={Callback::from(move |_| set_show_achievements.set(false))}
+                />
+            </Show>
+
             <Show when={move || show_leaderboard.get()}>
-                <components::LeaderboardModal 
-                    entries={move || leaderboard_entries.get()} 
-                    on_close={Callback::from(move |_| set_show_leaderboard.set(false))} 
+                <components::LeaderboardModal
+                    entries={move || leaderboard_entries.get()}
+                    on_close={Callback::from(move |_| set_show_leaderboard.set(false))}
                 />
             </Show>
 
@@ -197,7 +210,7 @@ fn App() -> impl IntoView {
             </Show>
 
             <Show when={move || show_shared_view.get()}>
-                <components::SharedViewModal 
+                <components::SharedViewModal
                     stats={global_stats.get().unwrap_or(api::GlobalStats {
                         total_energy: 0.0,
                         total_players: 0,
@@ -205,7 +218,7 @@ fn App() -> impl IntoView {
                         total_plasma_tethers: 0,
                         total_orbital_mirrors: 0,
                     })}
-                    on_close={Callback::from(move |_| set_show_shared_view.set(false))} 
+                    on_close={Callback::from(move |_| set_show_shared_view.set(false))}
                 />
             </Show>
         </div>
@@ -220,5 +233,8 @@ fn main() {
         .unwrap()
         .get_element_by_id("root")
         .expect("could not find #root element");
-    mount_to(root.unchecked_into::<web_sys::HtmlElement>(), || view! { <App/> })
+    mount_to(
+        root.unchecked_into::<web_sys::HtmlElement>(),
+        || view! { <App/> },
+    )
 }

@@ -36,6 +36,6 @@ COPY --from=builder --chown=oxidize:oxidize /app/oxidize-ui/dist /app/dist
 COPY --from=builder --chown=oxidize:oxidize /app/target/release/oxidize-server /app/oxidize-server-bin
 
 USER oxidize
-EXPOSE 9531
+EXPOSE 7412
 
 CMD ["/app/oxidize-server-bin"]

@@ -1,0 +1,24 @@
+{
+  "name": "oxidize",
+  "version": "1.0.0",
+  "description": "**Oxidize** is a zero-click, brutalist incremental management game built entirely from first-principles in Type-Safe Rust.",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UberMetroid/oxidize.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UberMetroid/oxidize/issues"
+  },
+  "homepage": "https://github.com/UberMetroid/oxidize#readme",
+  "dependencies": {
+    "jimp": "^1.6.0",
+    "playwright": "^1.58.2"
+  }
+}

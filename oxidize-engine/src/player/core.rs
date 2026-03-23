@@ -1,0 +1,116 @@
+//! Player state management for Oxidize.
+//!
+//! Handles the player's energy, upgrades, and progression.
+
+use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
+
+use crate::achievements::Achievement;
+use crate::factions::calculate_meditation_bonus;
+use crate::types::{Faction, UpgradeType};
+
+/// Represents a player's current game state.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct PlayerState {
+    pub faction: Faction,
+    pub energy: f64,
+    pub total_energy_generated: f64,
+    pub solar_sails: u32,
+    pub plasma_tethers: u32,
+    pub orbital_mirrors: u32,
+    pub dyson_collectors: u32,
+    pub quantum_arrays: u32,
+    pub stellar_engines: u32,
+    pub last_sync_time: u64,
+    pub last_synced_total_energy: f64,
+    pub last_purchase_time: u64,
+    #[serde(default)]
+    pub achievements: HashSet<Achievement>,
+    #[serde(default)]
+    pub consecutive_days: u32,
+}
+
+impl PlayerState {
+    /// Creates a new PlayerState with default values.
+    pub fn new(faction: Faction) -> Self {
+        Self {
+            faction,
+            energy: 0.0,
+            total_energy_generated: 0.0,
+            solar_sails: 0,
+            plasma_tethers: 0,
+            orbital_mirrors: 0,
+            dyson_collectors: 0,
+            quantum_arrays: 0,
+            stellar_engines: 0,
+            last_sync_time: 0,
+            last_synced_total_energy: 0.0,
+            last_purchase_time: 0,
+            achievements: HashSet::new(),
+            consecutive_days: 1,
+        }
+    }
+
+    /// Returns the count of a specific upgrade type.
+    pub fn count_for_upgrade(&self, upgrade: UpgradeType) -> u32 {
+        match upgrade {
+            UpgradeType::SolarSail => self.solar_sails,
+            UpgradeType::PlasmaTether => self.plasma_tethers,
+            UpgradeType::OrbitalMirror => self.orbital_mirrors,
+            UpgradeType::DysonCollector => self.dyson_collectors,
+            UpgradeType::QuantumArray => self.quantum_arrays,
+            UpgradeType::StellarEngine => self.stellar_engines,
+        }
+    }
+
+    /// Checks if the player can afford an upgrade.
+    pub fn can_afford(&self, upgrade: UpgradeType) -> bool {
+        if !upgrade.is_unlocked(self.total_energy_generated) {
+            return false;
+        }
+        let cost = upgrade.calculate_cost(self.count_for_upgrade(upgrade));
+        self.energy >= cost
+    }
+
+    /// Attempts to purchase an upgrade. Returns true if successful.
+    pub fn buy_upgrade(&mut self, upgrade: UpgradeType, current_time: u64) -> bool {
+        if !upgrade.is_unlocked(self.total_energy_generated) {
+            return false;
+        }
+        let cost = upgrade.calculate_cost(self.count_for_upgrade(upgrade));
+        if self.energy >= cost {
+            self.energy -= cost;
+            self.last_purchase_time = current_time;
+            match upgrade {
+                UpgradeType::SolarSail => self.solar_sails += 1,
+                UpgradeType::PlasmaTether => self.plasma_tethers += 1,
+                UpgradeType::OrbitalMirror => self.orbital_mirrors += 1,
+                UpgradeType::DysonCollector => self.dyson_collectors += 1,
+                UpgradeType::QuantumArray => self.quantum_arrays += 1,
+                UpgradeType::StellarEngine => self.stellar_engines += 1,
+            }
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Advances the simulation by delta_seconds, adding generated energy.
+    pub fn tick(&mut self, delta_seconds: f64, current_time: u64) {
+        let eps = self.energy_per_second();
+        let mut generated = eps * delta_seconds;
+
+        if self.faction == Faction::Green {
+            let idle_seconds = if self.last_purchase_time > 0 {
+                (current_time - self.last_purchase_time) as f64 / 1000.0
+            } else {
+                0.0
+            };
+            generated +=
+                calculate_meditation_bonus(self.energy, idle_seconds) * delta_seconds / 60.0;
+        }
+
+        self.energy += generated;
+        self.total_energy_generated += generated;
+    }
+}

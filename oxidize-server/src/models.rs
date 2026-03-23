@@ -1,4 +1,4 @@
-use oxidize_engine::Faction;
+use oxidize_engine::{Achievement, Faction};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -11,6 +11,14 @@ pub struct SyncRequest {
 pub struct SyncResponse {
     pub success: bool,
     pub server_time: i64,
+    pub newly_unlocked_achievements: Vec<AchievementInfo>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AchievementInfo {
+    pub achievement: Achievement,
+    pub name: String,
+    pub description: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

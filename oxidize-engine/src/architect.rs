@@ -53,6 +53,9 @@ impl Architect {
                 self.milestones_reached
                     .insert(Milestone::FirstOrbitalMirror);
             }
+            UpgradeType::DysonCollector
+            | UpgradeType::QuantumArray
+            | UpgradeType::StellarEngine => {}
         }
     }
 
