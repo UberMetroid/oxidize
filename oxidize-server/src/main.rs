@@ -1,5 +1,5 @@
 use std::net::SocketAddr;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::time::Duration;
 
 use axum::{routing::get, routing::post, Router};
@@ -29,8 +29,16 @@ fn get_data_dir() -> PathBuf {
     PathBuf::from(get_env_or_default("DATA_DIR", "./data"))
 }
 
-fn get_database_url(data_dir: &Path) -> String {
-    format!("sqlite://{}/oxidize.db", data_dir.to_string_lossy())
+fn get_database_url() -> String {
+    let data_dir = get_data_dir();
+    ensure_data_dir(&data_dir).ok();
+    let db_path = std::env::current_dir()
+        .unwrap_or_default()
+        .join(&data_dir)
+        .join("oxidize.db");
+    std::fs::File::create(&db_path).ok();
+    let path = db_path.to_string_lossy().replace("/./", "/").replace("./", "");
+    path
 }
 
 fn get_server_host() -> String {
@@ -92,7 +100,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data_dir = get_data_dir();
     ensure_data_dir(&data_dir)?;
 
-    let database_url = get_database_url(&data_dir);
+    let database_url = get_database_url();
     let pool = create_pool(&database_url).await?;
     init_database(&pool).await?;
 

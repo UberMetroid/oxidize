@@ -12,26 +12,22 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /build
 
 # Copy manifests first for dependency caching
 COPY Cargo.toml Cargo.lock ./
 COPY oxidize-engine/Cargo.toml oxidize-engine/
 COPY oxidize-server/Cargo.toml oxidize-server/
-COPY oxidize-ui/Cargo.toml oxidize-ui/
 
-# Create dummy source files to cache dependency compilation
-RUN mkdir -p src && \
-    echo "fn main() {}" > src/main.rs && \
-    echo "pub fn lib() {}" > src/lib.rs
+# Copy oxidize-engine source (needed by server)
+COPY oxidize-engine/src oxidize-engine/src
+COPY oxidize-engine/Cargo.toml oxidize-engine/
 
-# Build dependencies (cached if Cargo.toml unchanged)
-RUN cargo build --release -p oxidize-server --bin oxidize-server 2>/dev/null || true
+# Create dummy source for workspace
+RUN mkdir -p oxidize-ui/src && \
+    echo "pub fn lib() {}" > oxidize-ui/src/lib.rs
 
-# Copy actual source code
-COPY . .
-
-# Build the server binary
+# Build dependencies
 RUN cargo build --release -p oxidize-server --bin oxidize-server
 
 # =============================================================================
@@ -53,7 +49,7 @@ RUN groupadd --gid 1000 oxidize && \
 WORKDIR /app
 
 # Copy binary from builder
-COPY --from=builder /app/target/release/oxidize-server /app/oxidize-server
+COPY --from=builder /build/target/release/oxidize-server /app/oxidize-server
 
 # Copy data directory structure
 RUN mkdir -p /app/data && chown oxidize:oxidize /app
