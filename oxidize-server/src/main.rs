@@ -38,7 +38,7 @@ fn get_database_url() -> String {
         .join("oxidize.db");
     std::fs::File::create(&db_path).ok();
     let path = db_path.to_string_lossy().replace("/./", "/").replace("./", "");
-    path
+    format!("sqlite://{}", path)
 }
 
 fn get_server_host() -> String {
