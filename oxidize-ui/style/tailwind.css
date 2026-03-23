@@ -33,6 +33,7 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+.theme-neutral { --app-bg: #0f172a; --app-text: #f8fafc; --theme-primary: #10b981; }
 .theme-yellow { --app-bg: #1a1a00; --app-text: #ffffff; --theme-primary: #eab308; }
 .theme-red { --app-bg: #180000; --app-text: #ffffff; --theme-primary: #ff4444; }
 .theme-green { --app-bg: #001a0a; --app-text: #ffffff; --theme-primary: #4ade80; }

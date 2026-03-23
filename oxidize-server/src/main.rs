@@ -2,7 +2,8 @@ use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::time::Duration;
 
-use axum::{routing::get, routing::post, Router, response::{Html, Response}, body::Body};
+use axum::{routing::get, routing::post, Router, response::Html};
+use tower_http::services::ServeDir;
 use dotenvy::dotenv;
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
@@ -58,41 +59,6 @@ fn get_log_level() -> Level {
 
 async fn get_index_html() -> Html<&'static str> {
     Html(include_str!("../../oxidize-ui/dist/index.html"))
-}
-
-async fn serve_js() -> Response<Body> {
-    Response::builder()
-        .header("content-type", "text/javascript")
-        .body(Body::from(include_str!("../../oxidize-ui/dist/oxidize-ui-439bf11cc11dd38f.js")))
-        .unwrap()
-}
-
-async fn serve_wasm() -> Response<Body> {
-    Response::builder()
-        .header("content-type", "application/wasm")
-        .body(Body::from(include_bytes!("../../oxidize-ui/dist/oxidize-ui-439bf11cc11dd38f_bg.wasm").as_ref()))
-        .unwrap()
-}
-
-async fn serve_css() -> Response<Body> {
-    Response::builder()
-        .header("content-type", "text/css")
-        .body(Body::from(include_str!("../../oxidize-ui/dist/tailwind-fd5a060bfa3eb17e.css")))
-        .unwrap()
-}
-
-async fn serve_manifest() -> Response<Body> {
-    Response::builder()
-        .header("content-type", "application/manifest+json")
-        .body(Body::from(include_str!("../../oxidize-ui/dist/manifest.json")))
-        .unwrap()
-}
-
-async fn serve_sw() -> Response<Body> {
-    Response::builder()
-        .header("content-type", "text/javascript")
-        .body(Body::from(include_str!("../../oxidize-ui/dist/sw.js")))
-        .unwrap()
 }
 
 async fn shutdown_signal() {
@@ -178,12 +144,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "/api/global-stats",
             get(get_global_stats),
         )
-        .route("/oxidize-ui-439bf11cc11dd38f.js", get(serve_js))
-        .route("/oxidize-ui-439bf11cc11dd38f_bg.wasm", get(serve_wasm))
-        .route("/tailwind-fd5a060bfa3eb17e.css", get(serve_css))
-        .route("/manifest.json", get(serve_manifest))
-        .route("/sw.js", get(serve_sw))
-        .fallback(get_index_html)
+        .fallback_service(ServeDir::new("/app/oxidize-ui/dist"))
         .layer(cors)
         .layer(TraceLayer::new_for_http())
         .with_state(state);

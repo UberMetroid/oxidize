@@ -33,6 +33,23 @@ fn load_state() -> PlayerState {
     PlayerState::new(Faction::Orange)
 }
 
+fn calculate_building_count(state: &PlayerState) -> u32 {
+    state.solar_sails + state.plasma_tethers + state.orbital_mirrors +
+    state.dyson_collectors + state.quantum_arrays + state.stellar_engines
+}
+
+fn get_theme_intensity(building_count: u32) -> f32 {
+    if building_count == 0 {
+        0.0 // No faction colors
+    } else if building_count <= 2 {
+        0.3 // Subtle hints
+    } else if building_count <= 5 {
+        0.6 // Moderate intensity
+    } else {
+        1.0 // Full faction colors
+    }
+}
+
 #[component]
 fn App() -> impl IntoView {
     let player_uuid = get_player_uuid();
@@ -40,15 +57,13 @@ fn App() -> impl IntoView {
     initial_state.calculate_offline_progress(js_sys::Date::now() as u64);
 
     let (state, set_state) = create_signal(initial_state);
-    let (theme, set_theme) = create_signal("orange".to_string());
+    let (selected_faction, set_selected_faction) = create_signal(Faction::Orange);
     let (show_leaderboard, set_show_leaderboard) = create_signal(false);
     let (show_how_to_play, set_show_how_to_play) = create_signal(false);
     let (show_shared_view, set_show_shared_view) = create_signal(false);
     let (leaderboard_entries, set_leaderboard_entries) = create_signal(Vec::new());
     let (architect_message, set_architect_message) = create_signal(None as Option<String>);
     let (global_stats, set_global_stats) = create_signal(None as Option<api::GlobalStats>);
-    let (show_achievements, set_show_achievements) = create_signal(false);
-    let (achievement_list, set_achievement_list) = create_signal(Vec::new());
 
     let (last_purchase_time, set_last_purchase_time) = create_signal(0u64);
     let (architect_faction, set_architect_faction) = create_signal(Faction::Orange);
@@ -56,21 +71,31 @@ fn App() -> impl IntoView {
     create_effect(move |_| {
         if let Some(window) = web_sys::window() {
             if let Ok(Some(storage)) = window.local_storage() {
-                if let Ok(Some(t)) = storage.get_item("color-theme") {
-                    set_theme.set(t.clone());
-                } else {
-                    let _ = storage.set_item("color-theme", &theme.get());
+                if let Ok(Some(f)) = storage.get_item("selected-faction") {
+                    if let Ok(faction) = serde_json::from_str::<Faction>(&f) {
+                        set_selected_faction.set(faction);
+                    }
                 }
             }
         }
     });
 
     create_effect(move |_| {
-        let t = theme.get();
+        let faction = selected_faction.get();
+        let current_state = state.get();
+        let building_count = calculate_building_count(&current_state);
+        let intensity = get_theme_intensity(building_count);
+
         if let Some(window) = web_sys::window() {
             if let Some(doc) = window.document() {
                 if let Some(el) = doc.document_element() {
-                    let _ = el.set_attribute("class", &format!("theme-{}", t));
+                    if intensity > 0.0 {
+                        let faction_str = format!("{:?}", faction).to_lowercase();
+                        let _ = el.set_attribute("class", &format!("theme-{}", faction_str));
+                    } else {
+                        // Neutral theme when no buildings
+                        let _ = el.set_attribute("class", "theme-neutral");
+                    }
                 }
             }
         }
@@ -103,15 +128,7 @@ fn App() -> impl IntoView {
             let uuid_clone = uuid.clone();
             let state_clone = current_state.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                match api::sync_state(&uuid_clone, &state_clone).await {
-                    Ok(response) => {
-                        if !response.newly_unlocked_achievements.is_empty() {
-                            set_achievement_list.set(response.newly_unlocked_achievements);
-                            set_show_achievements.set(true);
-                        }
-                    }
-                    Err(_) => {}
-                }
+                let _ = api::sync_state(&uuid_clone, &state_clone).await;
             });
         });
         interval.forget();
@@ -174,12 +191,60 @@ fn App() -> impl IntoView {
                         <button on:click={move |_| { set_show_how_to_play.set(true); }} class="px-6 py-2 glass-pad text-sm font-bold tracking-widest hover:scale-105 transition-all text-theme-primary">"HOW TO PLAY"</button>
                     </div>
                     <div class="flex gap-4 mt-2">
-                        <button on:click={move |_| { set_theme.set("red".to_string()); set_architect_faction.set(Faction::Red); }} class="w-10 h-10 rounded-xl bg-red-500 hover:scale-110 transition-all"></button>
-                        <button on:click={move |_| { set_theme.set("orange".to_string()); set_architect_faction.set(Faction::Orange); }} class="w-10 h-10 rounded-xl bg-orange-500 hover:scale-110 transition-all"></button>
-                        <button on:click={move |_| { set_theme.set("yellow".to_string()); set_architect_faction.set(Faction::Yellow); }} class="w-10 h-10 rounded-xl bg-yellow-400 hover:scale-110 transition-all"></button>
-                        <button on:click={move |_| { set_theme.set("green".to_string()); set_architect_faction.set(Faction::Green); }} class="w-10 h-10 rounded-xl bg-green-500 hover:scale-110 transition-all"></button>
-                        <button on:click={move |_| { set_theme.set("blue".to_string()); set_architect_faction.set(Faction::Blue); }} class="w-10 h-10 rounded-xl bg-blue-500 hover:scale-110 transition-all"></button>
-                        <button on:click={move |_| { set_theme.set("purple".to_string()); set_architect_faction.set(Faction::Purple); }} class="w-10 h-10 rounded-xl bg-purple-500 hover:scale-110 transition-all"></button>
+                        <button on:click={move |_| {
+                            set_selected_faction.set(Faction::Red);
+                            set_architect_faction.set(Faction::Red);
+                            if let Some(window) = web_sys::window() {
+                                if let Ok(Some(storage)) = window.local_storage() {
+                                    let _ = storage.set_item("selected-faction", &serde_json::to_string(&Faction::Red).unwrap());
+                                }
+                            }
+                        }} class="w-10 h-10 rounded-xl bg-red-500 hover:scale-110 transition-all"></button>
+                        <button on:click={move |_| {
+                            set_selected_faction.set(Faction::Orange);
+                            set_architect_faction.set(Faction::Orange);
+                            if let Some(window) = web_sys::window() {
+                                if let Ok(Some(storage)) = window.local_storage() {
+                                    let _ = storage.set_item("selected-faction", &serde_json::to_string(&Faction::Orange).unwrap());
+                                }
+                            }
+                        }} class="w-10 h-10 rounded-xl bg-orange-500 hover:scale-110 transition-all"></button>
+                        <button on:click={move |_| {
+                            set_selected_faction.set(Faction::Yellow);
+                            set_architect_faction.set(Faction::Yellow);
+                            if let Some(window) = web_sys::window() {
+                                if let Ok(Some(storage)) = window.local_storage() {
+                                    let _ = storage.set_item("selected-faction", &serde_json::to_string(&Faction::Yellow).unwrap());
+                                }
+                            }
+                        }} class="w-10 h-10 rounded-xl bg-yellow-400 hover:scale-110 transition-all"></button>
+                        <button on:click={move |_| {
+                            set_selected_faction.set(Faction::Green);
+                            set_architect_faction.set(Faction::Green);
+                            if let Some(window) = web_sys::window() {
+                                if let Ok(Some(storage)) = window.local_storage() {
+                                    let _ = storage.set_item("selected-faction", &serde_json::to_string(&Faction::Green).unwrap());
+                                }
+                            }
+                        }} class="w-10 h-10 rounded-xl bg-green-500 hover:scale-110 transition-all"></button>
+                        <button on:click={move |_| {
+                            set_selected_faction.set(Faction::Blue);
+                            set_architect_faction.set(Faction::Blue);
+                            if let Some(window) = web_sys::window() {
+                                if let Ok(Some(storage)) = window.local_storage() {
+                                    let _ = storage.set_item("selected-faction", &serde_json::to_string(&Faction::Blue).unwrap());
+                                }
+                            }
+                        }} class="w-10 h-10 rounded-xl bg-blue-500 hover:scale-110 transition-all"></button>
+                        <button on:click={move |_| {
+                            set_selected_faction.set(Faction::Purple);
+                            set_architect_faction.set(Faction::Purple);
+                            if let Some(window) = web_sys::window() {
+                                if let Ok(Some(storage)) = window.local_storage() {
+                                    let _ = storage.set_item("selected-faction", &serde_json::to_string(&Faction::Purple).unwrap());
+                                }
+                            }
+                        }} class="w-10 h-10 rounded-xl bg-purple-500 hover:scale-110 transition-all"></button>
                     </div>
                 </div>
             </div>
@@ -188,13 +253,6 @@ fn App() -> impl IntoView {
                 <components::ArchitectToast
                     message={architect_message.get().unwrap_or_default()}
                     on_close={Callback::from(move |_| set_architect_message.set(None))}
-                />
-            </Show>
-
-            <Show when={move || show_achievements.get()}>
-                <components::AchievementToast
-                    achievements={achievement_list.get()}
-                    on_close={Callback::from(move |_| set_show_achievements.set(false))}
                 />
             </Show>
 
