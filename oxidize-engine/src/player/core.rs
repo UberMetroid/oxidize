@@ -1,12 +1,8 @@
-//! Player state management for Oxidize.
-//!
-//! Handles the player's energy, upgrades, and progression.
 
 use serde::{Deserialize, Serialize};
 
 use crate::types::UpgradeType;
 
-/// Represents a player's current game state.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct PlayerState {
     pub energy: f64,
@@ -23,7 +19,6 @@ pub struct PlayerState {
 }
 
 impl PlayerState {
-    /// Creates a new PlayerState with default values.
     pub fn new() -> Self {
         Self {
             energy: 0.0,
@@ -40,7 +35,6 @@ impl PlayerState {
         }
     }
 
-    /// Returns the count of a specific upgrade type.
     pub fn count_for_upgrade(&self, upgrade: UpgradeType) -> u32 {
         match upgrade {
             UpgradeType::SolarSail => self.solar_sails,
@@ -52,7 +46,6 @@ impl PlayerState {
         }
     }
 
-    /// Checks if the player can afford an upgrade.
     pub fn can_afford(&self, upgrade: UpgradeType) -> bool {
         if !upgrade.is_unlocked(self.total_energy_generated) {
             return false;
@@ -61,7 +54,6 @@ impl PlayerState {
         self.energy >= cost
     }
 
-    /// Attempts to purchase an upgrade. Returns true if successful.
     pub fn buy_upgrade(&mut self, upgrade: UpgradeType, current_time: u64) -> bool {
         if !upgrade.is_unlocked(self.total_energy_generated) {
             return false;
@@ -84,7 +76,6 @@ impl PlayerState {
         }
     }
 
-    /// Advances the simulation by delta_seconds, adding generated energy.
     pub fn tick(&mut self, delta_seconds: f64, _current_time: u64) {
         let eps = self.energy_per_second();
         let generated = eps * delta_seconds;

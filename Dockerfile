@@ -78,9 +78,7 @@ USER oxidize
 # Expose default port
 EXPOSE 7412
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:7412/health || exit 1
+
 
 # Run as non-root
 ENTRYPOINT ["./oxidize-server"]

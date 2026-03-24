@@ -83,12 +83,12 @@ button {
 
 .neon-orb {
   position: relative;
-  width: 15vw;
-  height: 15vw;
-  min-width: 150px;
-  min-height: 150px;
-  max-width: 300px;
-  max-height: 300px;
+  width: 8vw;
+  height: 8vw;
+  min-width: 80px;
+  min-height: 80px;
+  max-width: 160px;
+  max-height: 160px;
   border-radius: 50%;
   background: var(--theme-primary);
   box-shadow:
@@ -153,13 +153,6 @@ button {
   }
 }
 
-@keyframes orb-particle {
-  0% { transform: rotate(0deg) translateY(-120%) scale(1); opacity: 0; }
-  10% { opacity: 0.8; }
-  90% { opacity: 0.8; }
-  100% { transform: rotate(360deg) translateY(-120%) scale(0.5); opacity: 0; }
-}
-
 @keyframes orb-shimmer {
   0% { filter: hue-rotate(0deg) brightness(1); }
   50% { filter: hue-rotate(15deg) brightness(1.15); }
@@ -168,51 +161,18 @@ button {
 
 .neon-orb {
   position: relative;
-  width: 15vw;
-  height: 15vw;
-  min-width: 150px;
-  min-height: 150px;
-  max-width: 300px;
-  max-height: 300px;
+  width: 8vw;
+  height: 8vw;
+  min-width: 80px;
+  min-height: 80px;
+  max-width: 160px;
+  max-height: 160px;
   border-radius: 50%;
   background: var(--theme-primary);
   animation:
     pulse-orb 3s ease-in-out infinite alternate,
     orb-glow 4s ease-in-out infinite,
     orb-shimmer 8s linear infinite;
-}
-
-.neon-orb::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200%;
-  height: 200%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    transparent 30%,
-    rgba(0, 0, 0, 0.1) 50%,
-    transparent 70%
-  );
-  animation: orb-particle 6s linear infinite;
-  pointer-events: none;
-}
-
-.neon-orb::after {
-  content: '';
-  position: absolute;
-  top: -20%;
-  left: -20%;
-  right: -20%;
-  bottom: -20%;
-  border-radius: 50%;
-  background: transparent;
-  border: 2px solid var(--theme-primary);
-  opacity: 0.2;
-  animation: pulse-orb 2s ease-in-out infinite alternate;
 }
 
 .neon-orb-inner {

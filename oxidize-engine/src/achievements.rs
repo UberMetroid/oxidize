@@ -1,10 +1,6 @@
-//! Achievement definitions for Oxidize.
-//!
-//! Achievements track player milestones and accomplishments.
 
 use serde::{Deserialize, Serialize};
 
-/// All achievements a player can unlock.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Achievement {
     FirstSail,
@@ -31,7 +27,6 @@ pub enum Achievement {
 }
 
 impl Achievement {
-    /// Display name of the achievement.
     pub fn name(&self) -> &'static str {
         match self {
             Achievement::FirstSail => "First Light",
@@ -58,7 +53,6 @@ impl Achievement {
         }
     }
 
-    /// Description of how to unlock this achievement.
     pub fn description(&self) -> &'static str {
         match self {
             Achievement::FirstSail => "Purchase your first Solar Sail",
@@ -85,7 +79,6 @@ impl Achievement {
         }
     }
 
-    /// Check which achievements are newly unlocked based on player state.
     pub fn check_unlockables(
         current_achievements: &std::collections::HashSet<Achievement>,
         total_energy: f64,

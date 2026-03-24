@@ -1,4 +1,3 @@
-//! Orange faction quips - Enthusiastically supportive.
 
 use crate::architect::{Milestone, QuipTrigger};
 use crate::UpgradeType;

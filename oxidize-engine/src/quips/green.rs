@@ -1,4 +1,3 @@
-//! Green faction quips - Mystically zen.
 
 use crate::architect::{Milestone, QuipTrigger};
 use crate::UpgradeType;

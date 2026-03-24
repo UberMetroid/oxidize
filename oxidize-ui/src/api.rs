@@ -2,7 +2,7 @@ use gloo_net::http::Request as GlooRequest;
 use oxidize_engine::{Achievement, PlayerState};
 use serde::{Deserialize, Serialize};
 
-const API_BASE: &str = "http://localhost:7412";
+const API_BASE: &str = "http://localhost:7413";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SyncRequest {
@@ -73,6 +73,7 @@ pub async fn sync_state(
     Ok(response)
 }
 
+#[allow(dead_code)]
 pub async fn fetch_leaderboard() -> Result<LeaderboardResponse, wasm_bindgen::JsValue> {
     let resp = GlooRequest::get(&format!("{}/api/leaderboard", API_BASE))
         .send()
@@ -87,6 +88,7 @@ pub async fn fetch_leaderboard() -> Result<LeaderboardResponse, wasm_bindgen::Js
     Ok(response)
 }
 
+#[allow(dead_code)]
 pub async fn fetch_global_stats() -> Result<GlobalStats, wasm_bindgen::JsValue> {
     let resp = GlooRequest::get(&format!("{}/api/global-stats", API_BASE))
         .send()

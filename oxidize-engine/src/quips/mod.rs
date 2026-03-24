@@ -1,7 +1,3 @@
-//! Neutral snarky commentary for the Architect AI.
-//!
-//! Since factions are gone, we use a unified personality that's
-//! analytically clinical with a touch of zen wisdom.
 
 use crate::architect::QuipTrigger;
 

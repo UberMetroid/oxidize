@@ -1,4 +1,3 @@
-//! Blue faction quips - Analytically clinical.
 
 use crate::architect::{Milestone, QuipTrigger};
 use crate::UpgradeType;

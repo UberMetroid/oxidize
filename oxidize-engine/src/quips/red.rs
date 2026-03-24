@@ -1,4 +1,3 @@
-//! Red faction quips - Aggressively dismissive.
 
 use crate::architect::{Milestone, QuipTrigger};
 use crate::UpgradeType;

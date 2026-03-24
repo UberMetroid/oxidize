@@ -1,10 +1,8 @@
-//! Energy calculation helpers for Oxidize.
 
 use super::PlayerState;
 use crate::types::UpgradeType;
 
 impl PlayerState {
-    /// Calculates total energy generation per second.
     pub fn energy_per_second(&self) -> f64 {
         let base_eps = 1.0;
         let sail_eps = (self.solar_sails as f64) * UpgradeType::SolarSail.energy_per_second();
@@ -21,7 +19,6 @@ impl PlayerState {
         base_eps + sail_eps + tether_eps + mirror_eps + dyson_eps + quantum_eps + stellar_eps
     }
 
-    /// Calculates offline progress.
     pub fn calculate_offline_progress(&mut self, now: u64) {
         if self.last_sync_time > 0 && now > self.last_sync_time {
             let delta_seconds = (now - self.last_sync_time) as f64 / 1000.0;

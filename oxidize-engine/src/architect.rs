@@ -1,6 +1,3 @@
-//! Architect AI overseer for Oxidize.
-//!
-//! Tracks player milestones and generates faction-specific snarky commentary.
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -9,7 +6,6 @@ use crate::{Faction, PlayerState, UpgradeType};
 
 pub use crate::quips::generate_quip;
 
-/// Milestones that players can achieve in the game.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Milestone {
     FirstSolarSail,
@@ -21,7 +17,6 @@ pub enum Milestone {
     Energy100000,
 }
 
-/// Tracks a player's progress and generates commentary.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Architect {
     pub faction: Faction,
@@ -30,7 +25,6 @@ pub struct Architect {
 }
 
 impl Architect {
-    /// Creates a new Architect for the given faction.
     pub fn new(faction: Faction) -> Self {
         Self {
             faction,
@@ -39,7 +33,6 @@ impl Architect {
         }
     }
 
-    /// Records a purchase and marks the appropriate first-purchase milestone.
     pub fn record_purchase(&mut self, upgrade: UpgradeType, current_time: u64) {
         self.last_purchase_time = current_time;
         match upgrade {
@@ -59,7 +52,6 @@ impl Architect {
         }
     }
 
-    /// Checks and updates energy-based milestones.
     pub fn check_milestones(&mut self, state: &PlayerState) {
         if state.total_energy_generated >= 100.0 {
             self.milestones_reached.insert(Milestone::Energy100);
@@ -75,7 +67,6 @@ impl Architect {
         }
     }
 
-    /// Returns true if player has been idle for 60+ seconds since last purchase.
     pub fn should_trigger_idle(&self, current_time: u64) -> bool {
         if self.last_purchase_time == 0 {
             return false;
@@ -85,7 +76,6 @@ impl Architect {
     }
 }
 
-/// Events that trigger the Architect to speak.
 #[derive(Debug, Clone, Copy)]
 pub enum QuipTrigger {
     Idle,

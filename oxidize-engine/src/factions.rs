@@ -1,11 +1,6 @@
-//! Faction definitions and bonuses for Oxidize.
-//!
-//! Each faction has a unique identity with passive bonuses and special mechanics.
-//! Choose wisely - your faction defines your playstyle.
 
 use crate::types::{Faction, UpgradeType};
 
-/// Represents the unique identity and bonuses of each faction.
 #[derive(Debug, Clone, Copy)]
 pub struct FactionInfo {
     pub name: &'static str,
@@ -20,7 +15,6 @@ pub struct FactionInfo {
 }
 
 impl FactionInfo {
-    /// Returns the FactionInfo for a given faction.
     pub fn from_faction(faction: Faction) -> Self {
         match faction {
             Faction::Red => FactionInfo {
@@ -93,9 +87,6 @@ impl FactionInfo {
     }
 }
 
-/// Calculates the energy multiplier for a specific upgrade type based on faction.
-/// For Yellow faction, early upgrades get bonus, late upgrades get penalty.
-/// For Blue faction, each upgrade owned adds +3% efficiency.
 pub fn get_upgrade_multiplier(faction: Faction, upgrade: UpgradeType, owned: u32) -> f64 {
     let info = FactionInfo::from_faction(faction);
     let base_mult = match upgrade {
@@ -123,26 +114,18 @@ pub fn get_upgrade_multiplier(faction: Faction, upgrade: UpgradeType, owned: u32
     }
 }
 
-/// Calculates the cost multiplier for an upgrade based on faction.
-/// Blue faction pays 15% more for all upgrades.
 pub fn get_cost_multiplier(faction: Faction) -> f64 {
     FactionInfo::from_faction(faction).cost_mult
 }
 
-/// Calculates the offline progress multiplier based on faction.
-/// Green faction gets 50% more offline progress.
 pub fn get_offline_multiplier(faction: Faction) -> f64 {
     FactionInfo::from_faction(faction).offline_mult
 }
 
-/// Gets the sync interval in milliseconds for the faction.
-/// Yellow faction syncs faster (1.5s vs 2s) for more responsive feel.
 pub fn get_sync_interval(faction: Faction) -> u32 {
     FactionInfo::from_faction(faction).sync_interval_ms
 }
 
-/// Calculates bonus energy from meditation mechanic (Green faction).
-/// After 2 minutes of idle, generates 0.5% of max energy per minute.
 pub fn calculate_meditation_bonus(current_energy: f64, idle_seconds: f64) -> f64 {
     if idle_seconds < 120.0 {
         return 0.0;

@@ -1,4 +1,3 @@
-//! Purple faction quips - Ominously void-like.
 
 use crate::architect::{Milestone, QuipTrigger};
 use crate::UpgradeType;

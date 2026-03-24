@@ -1,4 +1,3 @@
-//! Yellow faction quips - Overly excited.
 
 use crate::architect::{Milestone, QuipTrigger};
 use crate::UpgradeType;

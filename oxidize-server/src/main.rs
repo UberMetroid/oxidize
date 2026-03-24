@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use axum::{routing::get, routing::post, Router, response::Html};
 use tower_http::services::ServeDir;
+use axum::routing::get_service;
 use dotenvy::dotenv;
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
@@ -13,7 +14,7 @@ use tracing_subscriber::FmtSubscriber;
 
 use oxidize_server::{create_pool, ensure_data_dir, init_database, AppState, handlers::{sync_player, get_player, get_player_achievements_handler, get_leaderboard, get_global_stats}};
 
-const DEFAULT_PORT: u16 = 7412;
+const DEFAULT_PORT: u16 = 7413;
 const DEFAULT_HOST: &str = "0.0.0.0";
 
 fn load_config() {
@@ -144,7 +145,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "/api/global-stats",
             get(get_global_stats),
         )
-        .fallback_service(ServeDir::new("/app/oxidize-ui/dist"))
+        .fallback_service(get_service(ServeDir::new("/home/jeryd/Projects/oxidize/oxidize-ui/dist")))
         .layer(cors)
         .layer(TraceLayer::new_for_http())
         .with_state(state);

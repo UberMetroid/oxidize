@@ -1,11 +1,6 @@
-//! Core game types for Oxidize.
-//!
-//! This module contains the fundamental types that define the game state,
-//! including factions and upgrade types.
 
 use serde::{Deserialize, Serialize};
 
-/// Represents the player's chosen faction, affecting UI theme.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum Faction {
@@ -19,7 +14,6 @@ pub enum Faction {
 }
 
 impl Faction {
-    /// Returns the lowercase string representation of the faction.
     pub fn as_str(&self) -> &'static str {
         match self {
             Faction::Red => "red",
@@ -48,7 +42,6 @@ impl std::str::FromStr for Faction {
     }
 }
 
-/// Types of upgrades available in the game.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum UpgradeType {
     SolarSail,
@@ -60,7 +53,6 @@ pub enum UpgradeType {
 }
 
 impl UpgradeType {
-    /// Base cost before exponential scaling.
     pub fn base_cost(&self) -> f64 {
         match self {
             UpgradeType::SolarSail => 10.0,
@@ -72,7 +64,6 @@ impl UpgradeType {
         }
     }
 
-    /// Energy generated per second by this upgrade.
     pub fn energy_per_second(&self) -> f64 {
         match self {
             UpgradeType::SolarSail => 1.0,
@@ -84,12 +75,10 @@ impl UpgradeType {
         }
     }
 
-    /// Cost multiplier for exponential scaling (1.15 = 15% increase per owned).
     pub fn cost_multiplier(&self) -> f64 {
         1.15
     }
 
-    /// Total energy generated required to unlock this upgrade.
     pub fn unlock_threshold(&self) -> f64 {
         match self {
             UpgradeType::SolarSail => 0.0,
@@ -101,17 +90,14 @@ impl UpgradeType {
         }
     }
 
-    /// Whether this upgrade is currently unlocked based on total energy generated.
     pub fn is_unlocked(&self, total_energy_generated: f64) -> bool {
         total_energy_generated >= self.unlock_threshold()
     }
 
-    /// Calculates the cost for purchasing this upgrade given current owned count.
     pub fn calculate_cost(&self, current_owned: u32) -> f64 {
         self.base_cost() * self.cost_multiplier().powi(current_owned as i32)
     }
 
-    /// Display name of the upgrade.
     pub fn name(&self) -> &'static str {
         match self {
             UpgradeType::SolarSail => "Solar Sail",
@@ -123,7 +109,6 @@ impl UpgradeType {
         }
     }
 
-    /// Description of the upgrade's lore and function.
     pub fn description(&self) -> &'static str {
         match self {
             UpgradeType::SolarSail => {
@@ -147,7 +132,6 @@ impl UpgradeType {
         }
     }
 
-    /// Returns all basic upgrades (always visible).
     pub fn basic_upgrades() -> Vec<UpgradeType> {
         vec![
             UpgradeType::SolarSail,
@@ -156,7 +140,6 @@ impl UpgradeType {
         ]
     }
 
-    /// Returns all advanced upgrades (require thresholds).
     pub fn advanced_upgrades() -> Vec<UpgradeType> {
         vec![
             UpgradeType::DysonCollector,

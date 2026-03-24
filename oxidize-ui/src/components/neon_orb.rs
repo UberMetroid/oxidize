@@ -7,7 +7,7 @@ pub fn NeonOrb(intensity: Option<i32>) -> impl IntoView {
         .unwrap_or("");
 
     view! {
-        <div class="flex-1 w-full relative pointer-events-none flex items-center justify-center">
+        <div class="absolute inset-0 pointer-events-none z-40 flex items-center justify-center">
             <div class="neon-orb" class:intense={!intensity_class.is_empty()}>
                 <div class="neon-orb-inner"></div>
             </div>

@@ -1,6 +1,18 @@
-[2m2026-03-23T03:38:13.997891Z[0m [32m INFO[0m No .env file found: path not found
-[2m2026-03-23T03:38:14.050049Z[0m [32m INFO[0m Oxidize Server running on http://0.0.0.0:7412
-[2m2026-03-23T03:38:14.050099Z[0m [32m INFO[0m Health endpoint: http://0.0.0.0:7412/health
-[2m2026-03-23T04:53:31.213977Z[0m [32m INFO[0m Received SIGTERM, initiating graceful shutdown...
-[2m2026-03-23T04:53:31.214133Z[0m [32m INFO[0m Closing database connections...
-[2m2026-03-23T04:53:31.214147Z[0m [32m INFO[0m Shutdown complete.
+   Compiling oxidize-server v0.1.0 (/home/jeryd/Projects/oxidize/oxidize-server)
+warning: function `get_index_html` is never used
+  --> oxidize-server/src/main.rs:60:10
+   |
+60 | async fn get_index_html() -> Html<&'static str> {
+   |          ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `oxidize-server` (bin "oxidize-server") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.70s
+     Running `target/debug/oxidize-server`
+[2m2026-03-23T15:32:27.062567Z[0m [32m INFO[0m No .env file found: path not found
+[2m2026-03-23T15:32:27.108787Z[0m [32m INFO[0m Oxidize Server running on http://0.0.0.0:7413
+[2m2026-03-23T15:32:27.108819Z[0m [32m INFO[0m Health endpoint: http://0.0.0.0:7413/health
+[2m2026-03-23T15:39:56.600579Z[0m [32m INFO[0m Received SIGTERM, initiating graceful shutdown...
+[2m2026-03-23T15:39:56.600774Z[0m [32m INFO[0m Closing database connections...
+[2m2026-03-23T15:39:56.600789Z[0m [32m INFO[0m Shutdown complete.
