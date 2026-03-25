@@ -60,8 +60,8 @@ pub fn setup_viewport_timer(
         } else { (50.0, 50.0, 1.0) };
         let nz = cz + (tz - cz) * 0.08;
         set_zoom.set(nz);
-        set_ox.set((50.0 - px) * nz);
-        set_oy.set((50.0 - py) * nz);
+        set_ox.set(50.0 - px);
+        set_oy.set(50.0 - py);
     });
 }
 
