@@ -3,6 +3,61 @@ use serde::{Deserialize, Serialize};
 
 use crate::types::UpgradeType;
 
+/// Planet bonus when a planet is actively orbiting.
+/// None = at sun (base energy only).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub enum PlanetBonus {
+    /// Base energy only
+    #[default]
+    Sun,
+    /// Mercury: +50% SolarSail output
+    Mercury,
+    /// Venus: +75% PlasmaTether output
+    Venus,
+    /// Earth: +25% all output + base 1.5x
+    Earth,
+    /// Mars: +100% synergy bonus (doubles the best upgrade)
+    Mars,
+    /// Jupiter: +50% Dysons
+    Jupiter,
+    /// Saturn: x2 all generation
+    Saturn,
+    /// Uranus: +200% QuantumArray output
+    Uranus,
+    /// Neptune: +100% StellarEngine output
+    Neptune,
+}
+
+impl PlanetBonus {
+    pub fn multiplier(&self, sails: u32, plasma: u32, mirrors: u32, dysons: u32, quantum: u32, stellar: u32) -> f64 {
+        match self {
+            PlanetBonus::Sun => 1.0,
+            PlanetBonus::Mercury => {
+                if sails > 0 { 1.5 } else { 1.0 }
+            }
+            PlanetBonus::Venus => {
+                if plasma > 0 { 1.75 } else { 1.0 }
+            }
+            PlanetBonus::Earth => 1.25,
+            PlanetBonus::Mars => {
+                // Double whichever upgrade you have the most of
+                let best = sails.max(plasma).max(mirrors).max(dysons).max(quantum).max(stellar);
+                if best > 0 { 2.0 } else { 1.0 }
+            }
+            PlanetBonus::Jupiter => {
+                if dysons > 0 { 1.5 } else { 1.0 }
+            }
+            PlanetBonus::Saturn => 2.0,
+            PlanetBonus::Uranus => {
+                if quantum > 0 { 3.0 } else { 1.0 }
+            }
+            PlanetBonus::Neptune => {
+                if stellar > 0 { 2.0 } else { 1.0 }
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct PlayerState {
     pub energy: f64,
@@ -16,6 +71,7 @@ pub struct PlayerState {
     pub last_sync_time: u64,
     pub last_synced_total_energy: f64,
     pub last_purchase_time: u64,
+    pub current_planet: PlanetBonus,
 }
 
 impl PlayerState {
@@ -32,6 +88,7 @@ impl PlayerState {
             last_sync_time: 0,
             last_synced_total_energy: 0.0,
             last_purchase_time: 0,
+            current_planet: PlanetBonus::Sun,
         }
     }
 

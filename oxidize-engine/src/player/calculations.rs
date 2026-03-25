@@ -16,7 +16,15 @@ impl PlayerState {
             (self.quantum_arrays as f64) * UpgradeType::QuantumArray.energy_per_second();
         let stellar_eps =
             (self.stellar_engines as f64) * UpgradeType::StellarEngine.energy_per_second();
-        base_eps + sail_eps + tether_eps + mirror_eps + dyson_eps + quantum_eps + stellar_eps
+        let raw = base_eps + sail_eps + tether_eps + mirror_eps + dyson_eps + quantum_eps + stellar_eps;
+        raw * self.current_planet.multiplier(
+            self.solar_sails,
+            self.plasma_tethers,
+            self.orbital_mirrors,
+            self.dyson_collectors,
+            self.quantum_arrays,
+            self.stellar_engines,
+        )
     }
 
     pub fn calculate_offline_progress(&mut self, now: u64) {

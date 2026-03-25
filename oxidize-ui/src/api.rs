@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use gloo_net::http::Request as GlooRequest;
 use oxidize_engine::{Achievement, PlayerState};
 use serde::{Deserialize, Serialize};
