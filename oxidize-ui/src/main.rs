@@ -43,6 +43,7 @@ pub fn App() -> impl IntoView {
     let (fly_vx, set_fly_vx) = create_signal(0.0f64); // velocity x
     let (fly_vy, set_fly_vy) = create_signal(0.0f64); // velocity y
     let (planet_offset, set_planet_offset) = create_signal(0.0f64);
+    let (trail_positions, set_trail_positions) = create_signal(Vec::<(f64, f64, f64)>::new()); // (x, y, age)
 
     create_effect(|_| {
         if let Some(window) = web_sys::window() {
@@ -88,7 +89,9 @@ pub fn App() -> impl IntoView {
     });
 
     create_effect(move |_| {
+        let mut frame_count = 0i32;
         let interval = gloo_timers::callback::Interval::new(16, move || {
+            frame_count = (frame_count + 1) % 3;
             set_planet_angles.update(|angles: &mut Vec<f64>| {
                 for (i, angle) in angles.iter_mut().enumerate() {
                     *angle += (2.0 * PI) / (PLANET_PERIODS[i] * 60.0);
@@ -107,6 +110,39 @@ pub fn App() -> impl IntoView {
                     let elapsed: f64 = (current_time - effect.start_time) / 1000.0;
                     if elapsed < 3.0 { effect.progress = (elapsed / 3.0).min(1.0); effect.angle += 0.02; true } else { false }
                 });
+            });
+            // Track ship world position for engine trail
+            let ship_angle: f64 = spaceship_angle.get();
+            let porbits = planet_angles.get();
+            let orbiting_idx = target_planet_idx.get();
+            let flying = is_flying.get();
+            let (world_x, world_y) = if flying {
+                (fly_x.get(), fly_y.get())
+            } else if let Some(idx) = orbiting_idx {
+                let planet_angle = PLANET_INITIAL_ANGLES[idx] + porbits[idx];
+                let planet_orbit_r = PLANET_DATA[idx].0;
+                let planet_x = 50.0 + planet_orbit_r * planet_angle.cos();
+                let planet_y = 50.0 + planet_orbit_r * planet_angle.sin();
+                let ship_orbit_r = SHIP_PLANET_ORBIT_RADIUS;
+                let offset = planet_offset.get();
+                let ship_angle = planet_angle + offset;
+                let sx = planet_x + ship_orbit_r * ship_angle.cos();
+                let sy = planet_y + ship_orbit_r * ship_angle.sin();
+                (sx, sy)
+            } else {
+                let x = 50.0 + SHIP_ORBIT_RADIUS as f64 * ship_angle.cos();
+                let y = 50.0 + SHIP_ORBIT_RADIUS as f64 * ship_angle.sin();
+                (x, y)
+            };
+            if frame_count == 0 {
+                set_trail_positions.update(|trail: &mut Vec<(f64, f64, f64)>| {
+                    trail.push((world_x, world_y, 0.0));
+                    if trail.len() > 20 { trail.remove(0); }
+                });
+            }
+            set_trail_positions.update(|trail: &mut Vec<(f64, f64, f64)>| {
+                for pos in trail.iter_mut() { pos.2 = (pos.2 + 0.05).min(1.0); }
+                trail.retain(|p| p.2 < 1.0);
             });
             if is_flying.get() {
                 // Physics-based movement with attraction and drag
@@ -242,6 +278,7 @@ pub fn App() -> impl IntoView {
                     fly_y={fly_y}
                     planet_offset={planet_offset}
                     launch_effects={launch_effects}
+                    trail_positions={trail_positions}
                 />
             </div>
 
