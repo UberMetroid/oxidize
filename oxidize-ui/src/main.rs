@@ -44,6 +44,10 @@ pub fn App() -> impl IntoView {
     let (fly_vy, set_fly_vy) = create_signal(0.0f64); // velocity y
     let (planet_offset, set_planet_offset) = create_signal(0.0f64);
     let (trail_positions, set_trail_positions) = create_signal(Vec::<(f64, f64, f64)>::new()); // (x, y, age)
+    let (flight_path, set_flight_path) = create_signal(Vec::<(f64, f64)>::new()); // actual trajectory during flight
+    let (flight_prediction, set_flight_prediction) = create_signal(Vec::<(f64, f64)>::new()); // predicted curved path
+    let (is_arriving, set_is_arriving) = create_signal(false); // brief moment when snapping into orbit
+    let (arrival_time, set_arrival_time) = create_signal(0.0); // timestamp when arrival started
 
     create_effect(|_| {
         if let Some(window) = web_sys::window() {
@@ -186,6 +190,67 @@ pub fn App() -> impl IntoView {
                 set_fly_x.set(new_x);
                 set_fly_y.set(new_y);
 
+                // Track flight path (actual trajectory)
+                if frame_count == 0 {
+                    set_flight_path.update(|path: &mut Vec<(f64, f64)>| {
+                        path.push((new_x, new_y));
+                        if path.len() > 100 { path.remove(0); }
+                    });
+                }
+
+                // Compute gravity-bent flight prediction
+                let porbits = planet_angles.get();
+                let target_idx = target_planet_idx.get().unwrap_or(0);
+                let mut prediction_points = Vec::new();
+                let mut pred_x = new_x;
+                let mut pred_y = new_y;
+                let mut pred_vx = new_vx;
+                let mut pred_vy = new_vy;
+                
+                for _ in 0..20 {
+                    prediction_points.push((pred_x, pred_y));
+                    
+                    // Direction to target planet
+                    let tdx = target_x - pred_x;
+                    let tdy = target_y - pred_y;
+                    let tdist = (tdx * tdx + tdy * tdy).sqrt();
+                    
+                    // Strong attraction to target
+                    let pred_attraction = 0.15;
+                    let mut pax = tdx / tdist.max(0.1) * pred_attraction;
+                    let mut pay = tdy / tdist.max(0.1) * pred_attraction;
+                    
+                    // Weak gravity wells from OTHER planets (not target)
+                    for (pidx, pdata) in PLANET_DATA.iter().enumerate() {
+                        if pidx == target_idx { continue; }
+                        
+                        let pangle = PLANET_INITIAL_ANGLES[pidx] + porbits[pidx];
+                        let ppx = 50.0 + pdata.0 * pangle.cos();
+                        let ppy = 50.0 + pdata.0 * pangle.sin();
+                        
+                        let gdx = ppx - pred_x;
+                        let gdy = ppy - pred_y;
+                        let gdist = (gdx * gdx + gdy * gdy).sqrt().max(1.0);
+                        
+                        // Gravity proportional to planet size (mass proxy), inverse square law
+                        let mass = pdata.1;
+                        let gravity_strength = mass / (gdist * gdist) * 0.5; // weak influence
+                        let gravity_force = gravity_strength.min(0.1);
+                        
+                        // Accumulate gravity influence
+                        pax += gdx / gdist * gravity_force;
+                        pay += gdy / gdist * gravity_force;
+                    }
+                    
+                    // Update prediction velocity and position
+                    let pdrag = 0.92;
+                    pred_vx = (pred_vx + pax) * pdrag;
+                    pred_vy = (pred_vy + pay) * pdrag;
+                    pred_x += pred_vx;
+                    pred_y += pred_vy;
+                }
+                set_flight_prediction.set(prediction_points);
+
                 // Check if arrived (slow enough and close enough)
                 let speed = (new_vx * new_vx + new_vy * new_vy).sqrt();
                 if dist < 0.5 && speed < 0.3 {
@@ -194,6 +259,8 @@ pub fn App() -> impl IntoView {
                     set_fly_vx.set(0.0);
                     set_fly_vy.set(0.0);
                     set_is_flying.set(false);
+                    set_is_arriving.set(true);
+                    // Clear flight path after 3 seconds (handled in component)
                     if let Some(idx) = target_planet_idx.get() {
                         let porbits = planet_angles.get();
                         let planet_angle = PLANET_INITIAL_ANGLES[idx] + porbits[idx];
@@ -203,7 +270,35 @@ pub fn App() -> impl IntoView {
                     }
                 }
             } else if target_planet_idx.get().is_none() {
+                // Not flying and no target planet - update spaceship angle
+                // Clear prediction when not flying
+                if !flight_prediction.get().is_empty() {
+                    set_flight_prediction.set(Vec::new());
+                }
+                // Reset arriving flag after brief moment and fade flight path
+                if is_arriving.get() {
+                    let current_time = js_sys::Date::now() as f64;
+                    use std::sync::OnceLock;
+                    static ARRIVAL_START: OnceLock<f64> = OnceLock::new();
+                    if ARRIVAL_START.get().is_none() {
+                        ARRIVAL_START.set(current_time).ok();
+                    }
+                    if let Some(&start) = ARRIVAL_START.get() {
+                        if current_time - start > 300.0 {
+                            set_is_arriving.set(false);
+                            // Fade out flight path after arrival
+                            set_flight_path.update(|path: &mut Vec<(f64, f64)>| {
+                                path.clear();
+                            });
+                        }
+                    }
+                }
                 set_spaceship_angle.update(|a| *a += 0.01);
+            } else {
+                // Not flying but has target planet (orbiting) - clear prediction
+                if !flight_prediction.get().is_empty() {
+                    set_flight_prediction.set(Vec::new());
+                }
             }
         });
         interval.forget();
@@ -285,6 +380,9 @@ pub fn App() -> impl IntoView {
                     planet_offset={planet_offset}
                     upgrade_effects={upgrade_effects}
                     trail_positions={trail_positions}
+                    flight_path={flight_path}
+                    flight_prediction={flight_prediction}
+                    is_arriving={is_arriving}
                 />
             </div>
 
