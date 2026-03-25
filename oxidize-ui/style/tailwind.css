@@ -294,3 +294,10 @@ button {
 .snap-ring {
     animation: snap-ring 0.3s ease-out forwards;
 }
+
+/* Solar system viewport transform */
+.solar-system-viewport {
+    overflow: visible;
+    transform-origin: center center;
+    will-change: transform;
+}

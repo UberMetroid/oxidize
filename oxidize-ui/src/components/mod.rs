@@ -1,15 +1,43 @@
 mod architect_toast;
+mod asteroid_belt;
+mod flight_path;
 mod game_header;
 mod how_to_play_modal;
 mod leaderboard_modal;
+mod moon;
+mod moons;
 mod neon_orb;
+mod orbital_paths;
+mod planet;
+mod planets;
+mod saturn_rings;
 mod shared_view;
+mod ship;
+mod ship_trail;
+mod solar_system;
+mod starfield;
+mod sun;
+mod upgrade_effects;
+mod uranus_rings;
 mod upgrade_panel;
 
 pub use architect_toast::ArchitectToast;
+pub use asteroid_belt::AsteroidBelt;
+pub use flight_path::FlightPath;
 pub use game_header::GameHeader;
 pub use how_to_play_modal::HowToPlayModal;
-//  // unused
+pub use moon::Moon;
+pub use moons::Moons;
 pub use neon_orb::NeonOrb;
-
+pub use orbital_paths::OrbitalPaths;
+pub use planet::Planet;
+pub use planets::Planets;
+pub use saturn_rings::SaturnRings;
+pub use ship::Ship;
+pub use ship_trail::ShipTrail;
+pub use solar_system::SolarSystem;
+pub use starfield::Starfield;
+pub use sun::Sun;
+pub use upgrade_effects::UpgradeEffects;
+pub use uranus_rings::UranusRings;
 pub use upgrade_panel::UpgradePanel;

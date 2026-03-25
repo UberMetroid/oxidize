@@ -1,16 +1,16 @@
 //! Static constants for the solar system visualization
 
 /// Planet data: (orbit_radius, size, color)
-/// Sizes balanced for visual clarity while maintaining relative proportions
+/// Sizes proportional to real planet sizes (Earth=1.0), adjusted for visual clarity
 pub static PLANET_DATA: &[(f64, f64, &str)] = &[
-    (8.0, 5.0, "#9ca3af"),   // Mercury
-    (14.0, 8.0, "#fbbf24"),  // Venus
-    (20.0, 9.0, "#3b82f6"),   // Earth
-    (27.0, 6.0, "#ef4444"),   // Mars
-    (38.0, 18.0, "#f97316"),  // Jupiter - biggest
-    (50.0, 15.0, "#eab308"),  // Saturn
-    (62.0, 10.0, "#06b6d4"),  // Uranus
-    (75.0, 9.0, "#6366f1"),  // Neptune
+    (7.0, 4.0, "#9ca3af"),   // Mercury: 0.38x Earth → size 4
+    (12.0, 9.0, "#fbbf24"),  // Venus: 0.95x Earth → size 9
+    (18.0, 9.0, "#3b82f6"),  // Earth: 1.0x → size 9
+    (25.0, 5.0, "#ef4444"),  // Mars: 0.53x Earth → size 5
+    (38.0, 18.0, "#f97316"), // Jupiter: 11.2x Earth → size 18
+    (50.0, 15.0, "#eab308"), // Saturn: 9.45x Earth → size 15
+    (62.0, 10.0, "#06b6d4"), // Uranus: 4.01x Earth → size 10
+    (74.0, 10.0, "#6366f1"), // Neptune: 3.88x Earth → size 10
 ];
 
 pub static PLANET_PERIODS: [f64; 8] = [4.0, 7.0, 10.0, 15.0, 30.0, 45.0, 60.0, 80.0];
