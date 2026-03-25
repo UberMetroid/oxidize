@@ -59,3 +59,15 @@ pub static MOON_PERIODS_FLAT: [f64; 14] = [
     18.0,  // Oberon (Uranus)
     10.0,  // Triton (Neptune)
 ];
+
+/// Zoom level per planet (smaller = more zoomed out).
+pub const PLANET_ZOOM: [f64; 8] = [
+    1.5, // Mercury
+    1.3, // Venus
+    1.1, // Earth
+    1.4, // Mars
+    0.9, // Jupiter
+    0.7, // Saturn
+    0.65, // Uranus
+    0.55, // Neptune
+];

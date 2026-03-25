@@ -14,3 +14,17 @@ pub fn NeonOrb(intensity: Option<i32>) -> impl IntoView {
         </div>
     }
 }
+
+/// Energy-reactive NeonOrb that scales glow with energy level
+#[component]
+pub fn NeonOrbEnergyAware(
+    energy_per_second: ReadSignal<f64>,
+) -> impl IntoView {
+    view! {
+        <div class="absolute inset-0 pointer-events-none z-40 flex items-center justify-center">
+            <div class="neon-orb-energy-aware" data-eps={move || energy_per_second.get().round() as i32}>
+                <div class="neon-orb-inner"></div>
+            </div>
+        </div>
+    }
+}

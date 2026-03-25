@@ -1,9 +1,8 @@
-//! Spaceship rendering with engine glow and cockpit
+//! Ship rendering with engine glow and cockpit
 //! 
 //! Props: spaceship_angle, target_planet_idx, is_flying, planet_angles,
 //! planet_offset, fly_x, fly_y, fly_from_x, fly_from_y
 //! 
-//! Uses the same math as solar_system.rs for world position.
 //! Renders ship at world position with engine glow + cockpit.
 
 use leptos::*;
@@ -57,11 +56,8 @@ pub fn Ship(
             
             format!("left: {}%%; top: {}%%; transform: translate(-50%%, -50%%) rotate({}rad); z-index: 30;", world_x, world_y, facing)
         }>
-            // Engine glow trail
             <div style="position: absolute; left: 50%%; top: 50%%; width: 0; height: 0; border-left: 2px solid transparent; border-right: 2px solid transparent; border-top: 8px solid #f97316; filter: blur(1px); opacity: 0.6; transform: translate(-50%%, 2px); animation: engine-glow 0.3s ease-in-out infinite;"></div>
-            // Ship body
             <div style="width: 0; height: 0; border-left: 3.5px solid transparent; border-right: 3.5px solid transparent; border-bottom: 7px solid #ef4444; filter: drop-shadow(0 0 4px #ef4444);"></div>
-            // Cockpit
             <div style="position: absolute; left: 50%%; top: 2px; transform: translateX(-50%%); width: 3px; height: 3px; background: #fef08a; border-radius: 50%%; box-shadow: 0 0 3px #fef08a;"></div>
         </div>
     }
