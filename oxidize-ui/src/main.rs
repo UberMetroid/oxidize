@@ -1,107 +1,111 @@
-//! Oxidize — Saturn Asteroids mode.
-
-mod asteroids;
-mod api;
-mod architect_quips;
-mod components;
-mod helpers;
-mod signals;
-mod timers;
-
+use gloo_timers::callback::Interval;
 use leptos::*;
 use wasm_bindgen::JsCast;
-use oxidize_engine::{PlayerState, UpgradeType};
-use asteroids::AsteroidsArena;
-use architect_quips::{quip_for_energy_milestone, quip_for_upgrade_purchase};
-use components::{ArchitectToast, GameHeader, HowToPlayModal, NeonOrb, UpgradePanel};
-use helpers::{get_player_uuid, load_state, save_state};
-use signals::GameSignals;
-use timers::setup_state_tick;
+use std::cell::Cell;
 
-#[component]
-pub fn App() -> impl IntoView {
-    let _player_uuid = get_player_uuid();
-    let mut initial_state = load_state();
-    initial_state.last_synced_total_energy = initial_state.total_energy_generated;
+const THRUST: f64 = 0.15;
+const ROTATE: f64 = 0.08;
+const DRAG: f64 = 0.99;
 
-    let signals = signals::create_game_signals(initial_state);
-    let GameSignals { state, architect_message, show_how_to_play, .. } = signals;
+#[derive(Default, Clone, Copy)]
+struct Ship { x: f64, y: f64, vx: f64, vy: f64, angle: f64 }
 
-    let (arch_read, arch_write) = (architect_message.0, architect_message.1);
-    let (how_read, how_write) = (show_how_to_play.0, show_how_to_play.1);
-
-    create_effect(move |_| {
-        let eps = state.0.get().energy_per_second();
-        if eps > 0.0 { arch_write.set(Some(quip_for_upgrade_purchase("start", 0))); }
-    });
-
-    setup_state_tick(state.1);
-
-    let (prev_energy, set_prev_energy) = create_signal(state.0.get().energy);
-
-    create_effect(move |_| {
-        let current = state.0.get().energy;
-        let prev = prev_energy.get();
-        if current >= 1000.0 && prev < 1000.0 {
-            arch_write.set(Some(quip_for_energy_milestone(current)));
-        }
-        set_prev_energy.set(current);
-    });
-
-    create_effect(move |_| {
-        if let Some(window) = web_sys::window() {
-            if let Some(doc) = window.document() {
-                if let Some(el) = doc.document_element() {
-                    let _ = el.set_attribute("class", "theme-neutral");
-                }
-            }
-        }
-    });
-
-    let buy_callback = Callback::new(move |ut| {
-        let current_time = js_sys::Date::now() as u64;
-        state.1.update(|s| {
-            if s.buy_upgrade(ut, current_time) {
-                arch_write.set(Some(quip_for_upgrade_purchase(
-                    match ut { oxidize_engine::UpgradeType::SolarSail => "SolarSail", _ => "upgrade" },
-                    s.count_for_upgrade(ut),
-                )));
-            }
-        });
-        let s = state.0.get();
-        save_state(&s);
-    });
-
-    view! {
-        <div class="flex flex-col h-full bg-transparent text-app-text overflow-hidden font-mono">
-            <GameHeader energy={move || state.0.get().energy} eps={move || state.0.get().energy_per_second()} />
-            <div class="relative flex-1 overflow-hidden">
-                <NeonOrb intensity={Some(state.0.get().energy_per_second() as i32)}/>
-                <AsteroidsArena />
-            </div>
-            <div class="w-full flex flex-col items-center pb-4 shrink-0 relative z-10 pointer-events-auto">
-                <UpgradePanel state={state.0} on_buy={buy_callback}/>
-            </div>
-            <Show when={move || arch_read.get().is_some()}>
-                <ArchitectToast
-                    message={arch_read.get().unwrap_or_default()}
-                    on_close={Callback::from(move |_| arch_write.set(None))}
-                />
-            </Show>
-            <Show when={move || how_read.get()}>
-                <HowToPlayModal on_close={Callback::from(move |_| how_write.set(false))}/>
-            </Show>
-        </div>
-    }
-}
+#[derive(Clone, Copy)]
+struct Bullet { x: f64, y: f64, vx: f64, vy: f64 }
 
 fn main() {
     console_error_panic_hook::set_once();
-    if let Some(window) = web_sys::window() {
-        if let Some(doc) = window.document() {
-            if let Some(root) = doc.get_element_by_id("root") {
-                leptos::mount_to(root.dyn_into::<web_sys::HtmlElement>().unwrap(), || view! { <App/> });
+    let document = web_sys::window().unwrap().document().unwrap();
+    let root = document.get_element_by_id("root").unwrap();
+    leptos::mount_to(root.dyn_into::<web_sys::HtmlElement>().unwrap(), || view! { <App/> });
+}
+
+#[component]
+fn App() -> impl IntoView {
+    let (keys, set_keys) = create_signal((false, false, false, false, false));
+    let (ship, set_ship) = create_signal(Ship { x: 50.0, y: 50.0, ..Default::default() });
+    let (bullets, set_bullets) = create_signal(Vec::<Bullet>::new());
+    let started = Cell::new(false);
+
+    let stars: Vec<(f64, f64)> = (0..100)
+        .map(|_| (js_sys::Math::random() * 100.0, js_sys::Math::random() * 100.0))
+        .collect();
+
+    create_effect(move |_| {
+        if started.get() { return; }
+        started.set(true);
+        Interval::new(16, move || {
+            let (up, down, left, right, fire) = keys.get();
+            set_ship.update(|s| {
+                if left  { s.angle -= ROTATE; }
+                if right { s.angle += ROTATE; }
+                if up {
+                    s.vx += s.angle.cos() * THRUST;
+                    s.vy += s.angle.sin() * THRUST;
+                }
+                if down {
+                    s.vx -= s.angle.cos() * THRUST * 0.4;
+                    s.vy -= s.angle.sin() * THRUST * 0.4;
+                }
+                s.vx *= DRAG;
+                s.vy *= DRAG;
+                s.x = (s.x + s.vx + 100.0) % 100.0;
+                s.y = (s.y + s.vy + 100.0) % 100.0;
+            });
+            if fire {
+                let s = ship.get();
+                set_bullets.update(|b| {
+                    b.push(Bullet {
+                        x: s.x, y: s.y,
+                        vx: s.angle.cos() * 0.8,
+                        vy: s.angle.sin() * 0.8,
+                    });
+                });
             }
-        }
+            set_bullets.update(|b| {
+                for bullet in b.iter_mut() {
+                    bullet.x = (bullet.x + bullet.vx + 100.0) % 100.0;
+                    bullet.y = (bullet.y + bullet.vy + 100.0) % 100.0;
+                }
+                if b.len() > 30 { *b = b[b.len()-30..].to_vec(); }
+            });
+        }).forget();
+    });
+
+    let sk = set_keys.clone();
+    let su = set_keys.clone();
+
+    view! {
+        <div class="w-screen h-screen bg-black overflow-hidden" tabindex="0"
+            on:keydown={move |ev: web_sys::KeyboardEvent| {
+                match ev.key().as_str() {
+                    "ArrowUp" | "w" | "W" => set_keys.update(|k| k.0 = true),
+                    "ArrowDown" | "s" | "S" => set_keys.update(|k| k.1 = true),
+                    "ArrowLeft" | "a" | "A" => set_keys.update(|k| k.2 = true),
+                    "ArrowRight" | "d" | "D" => set_keys.update(|k| k.3 = true),
+                    " " => set_keys.update(|k| k.4 = true),
+                    _ => {}
+                }
+                ev.prevent_default();
+            }}
+            on:keyup={move |ev: web_sys::KeyboardEvent| {
+                match ev.key().as_str() {
+                    "ArrowUp" | "w" | "W" => set_keys.update(|k| k.0 = false),
+                    "ArrowDown" | "s" | "S" => set_keys.update(|k| k.1 = false),
+                    "ArrowLeft" | "a" | "A" => set_keys.update(|k| k.2 = false),
+                    "ArrowRight" | "d" | "D" => set_keys.update(|k| k.3 = false),
+                    " " => set_keys.update(|k| k.4 = false),
+                    _ => {}
+                }
+            }}>
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full">
+                {stars.iter().map(|(x, y)| view! { <circle cx={*x} cy={*y} r="0.08" fill="white" opacity="0.4"/> }).collect::<Vec<_>>()}
+                {bullets.get().iter().map(|b| view! { <circle cx={b.x} cy={b.y} r="0.2" fill="#fff"/> }).collect::<Vec<_>>()}
+                <g transform={format!("translate({},{}) rotate({}deg)",
+                    ship.get().x, ship.get().y, ship.get().angle.to_degrees())}>
+                    <polygon points="-2,-1.5 4,0 -2,1.5" fill="none" stroke="#0f0" stroke-width="0.15"/>
+                </g>
+            </svg>
+        </div>
     }
 }
