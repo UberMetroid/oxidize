@@ -17,7 +17,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 js-sys = "0.3"
 uuid = { version = "1.0", features = ["v4", "serde", "js"] }
-web-sys = { version = "0.3", features = ["Storage", "Window", "Document", "Element", "HtmlElement", "Navigator", "Clipboard", "Request", "RequestInit", "Response", "TouchEvent", "Touch", "TouchList"] }
+web-sys = { version = "0.3", features = ["Storage", "Window", "Document", "Element", "HtmlElement", "Navigator", "Clipboard", "Request", "RequestInit", "Response", "TouchEvent", "Touch", "TouchList", "KeyboardEvent"] }
 
 [dev-dependencies]
 headless_chrome = "1.0"

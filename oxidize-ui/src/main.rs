@@ -77,7 +77,7 @@ pub fn App() -> impl IntoView {
             <GameHeader energy={move || state.0.get().energy} eps={move || state.0.get().energy_per_second()} />
             <div class="relative flex-1 overflow-hidden">
                 <NeonOrb intensity={Some(state.0.get().energy_per_second() as i32)}/>
-                <AsteroidsArena state_set={state.1} />
+                <AsteroidsArena />
             </div>
             <div class="w-full flex flex-col items-center pb-4 shrink-0 relative z-10 pointer-events-auto">
                 <UpgradePanel state={state.0} on_buy={buy_callback}/>
