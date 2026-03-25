@@ -20,5 +20,9 @@ uuid = { version = "1.0", features = ["v4", "serde", "js"] }
 web-sys = { version = "0.3", features = ["Storage", "Window", "Document", "Element", "HtmlElement", "Navigator", "Clipboard", "Request", "RequestInit", "Response", "TouchEvent", "Touch", "TouchList", "KeyboardEvent"] }
 
 [dev-dependencies]
+wasm-bindgen-test = "0.3"
+wasm-bindgen = "0.2"
+js-sys = "0.3"
 headless_chrome = "1.0"
 tokio = { version = "1.0", features = ["full"] }
+getrandom = { version = "0.2", features = ["js"] }

@@ -1,0 +1,19 @@
+# Trunk build configuration for Oxidize
+
+[build]
+# Target HTML file
+target = "index.html"
+
+[serve]
+# Local dev server
+address = "127.0.0.1"
+port = 7410
+# Rebuild on file change
+watch = ["src"]
+
+[tools]
+# WASM binaryen optimization
+wasm_opt = ["-O3", "--zero-filled-memory"]
+
+[clean]
+# Clean build artifacts on rebuild
