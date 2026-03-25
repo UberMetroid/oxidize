@@ -154,27 +154,29 @@ pub fn SolarSystem(
 
         {/* Sun - glowing center */}
         <div class="absolute pointer-events-none" style="left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 5;">
+            {/* Sun rays */}
+            <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, transparent 35%, rgba(255,200,50,0.04) 50%, transparent 65%); animation: corona-pulse 4s ease-in-out infinite;"></div>
             {/* Outer corona glow */}
-            <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle, #ffc83266 0%, #ff960019 60%, transparent 100%); animation: corona-pulse 3s ease-in-out infinite;"></div>
+            <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle, #ffc83280 0%, #ff960040 40%, transparent 70%); animation: corona-pulse 3s ease-in-out infinite;"></div>
             {/* Mid glow */}
-            <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #ffd700 40%, #ff8c00 80%, #ff6600 100%); animation: sun-pulse 2s ease-in-out infinite; box-shadow: 0 0 12px #ff8c00, 0 0 24px #ffa500, 0 0 40px #ffa5007f;"></div>
+            <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #ffd700 35%, #ff8c00 70%, #ff6600 100%); animation: sun-pulse 2.5s ease-in-out infinite; box-shadow: 0 0 15px #ff8c00, 0 0 30px #ffa500, 0 0 50px #ffa50080;"></div>
         </div>
 
         {/* Mercury */}
-        <div class="absolute pointer-events-none" style=move || { let porbits = planet_angles.get(); let i = 0; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let r = PLANET_DATA[i].0; let x = 50.0 + r * angle.cos(); let y = 50.0 + r * angle.sin(); format!("left: {}%; top: {}%; transform: translate(-50%, -50%); z-index: 10;", x, y) }>
-            <div style=format!("width: {}px; height: {}px; background: radial-gradient(circle at 35%% 35%%, #d1d5db, #6b7280 60%%, #374151); border-radius: 50%%; box-shadow: 0 0 3px #9ca3af, inset -1px -1px 2px #00000066;", PLANET_DATA[0].1, PLANET_DATA[0].1)></div>
+        <div class="absolute pointer-events-none" style=move || { let porbits = planet_angles.get(); let i = 0; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let r = PLANET_DATA[i].0; let x = 50.0 + r * angle.cos(); let y = 50.0 + r * angle.sin(); let lx = 50.0 + 25.0 * angle.cos(); let ly = 50.0 - 25.0 * angle.sin(); let lxc = lx.max(15.0).min(65.0); let lyc = ly.max(15.0).min(65.0); format!("left: {}%; top: {}%; transform: translate(-50%, -50%); z-index: 10;", x, y) }>
+            <div style=move || { let porbits = planet_angles.get(); let i = 0; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let lx = 50.0 + 25.0 * angle.cos(); let ly = 50.0 - 25.0 * angle.sin(); let lxc = lx.max(15.0).min(65.0); let lyc = ly.max(15.0).min(65.0); format!("width: {}px; height: {}px; background: radial-gradient(circle at {}%% {}%%, #d1d5db, #6b7280 60%%, #374151); border-radius: 50%%; box-shadow: 0 0 3px #9ca3af, inset -1px -1px 2px #00000066;", PLANET_DATA[0].1, PLANET_DATA[0].1, lxc, lyc) }></div>
         </div>
         {/* Venus */}
         <div class="absolute pointer-events-none" style=move || { let porbits = planet_angles.get(); let i = 1; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let r = PLANET_DATA[i].0; let x = 50.0 + r * angle.cos(); let y = 50.0 + r * angle.sin(); format!("left: {}%; top: {}%; transform: translate(-50%, -50%); z-index: 11;", x, y) }>
-            <div style=format!("width: {}px; height: {}px; background: radial-gradient(circle at 35%% 35%%, #fef3c7, #fbbf24 50%%, #d97706); border-radius: 50%%; box-shadow: 0 0 6px #fbbf24cc, inset -1px -1px 3px #0000004c;", PLANET_DATA[1].1, PLANET_DATA[1].1)></div>
+            <div style=move || { let porbits = planet_angles.get(); let i = 1; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let lx = 50.0 + 25.0 * angle.cos(); let ly = 50.0 - 25.0 * angle.sin(); let lxc = lx.max(15.0).min(65.0); let lyc = ly.max(15.0).min(65.0); format!("width: {}px; height: {}px; background: radial-gradient(circle at {}%% {}%%, #fef3c7, #fbbf24 50%%, #d97706); border-radius: 50%%; box-shadow: 0 0 6px #fbbf24cc, inset -1px -1px 3px #0000004c;", PLANET_DATA[1].1, PLANET_DATA[1].1, lxc, lyc) }></div>
         </div>
         {/* Earth */}
         <div class="absolute pointer-events-none" style=move || { let porbits = planet_angles.get(); let i = 2; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let r = PLANET_DATA[i].0; let x = 50.0 + r * angle.cos(); let y = 50.0 + r * angle.sin(); format!("left: {}%; top: {}%; transform: translate(-50%, -50%); z-index: 12;", x, y) }>
-            <div style=format!("width: {}px; height: {}px; background: radial-gradient(circle at 35%% 35%%, #93c5fd, #3b82f6 50%%, #1e3a8a); border-radius: 50%%; box-shadow: 0 0 6px #3b82f6e5, inset -1px -1px 3px #0000004c;", PLANET_DATA[2].1, PLANET_DATA[2].1)></div>
+            <div style=move || { let porbits = planet_angles.get(); let i = 2; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let lx = 50.0 + 25.0 * angle.cos(); let ly = 50.0 - 25.0 * angle.sin(); let lxc = lx.max(15.0).min(65.0); let lyc = ly.max(15.0).min(65.0); format!("width: {}px; height: {}px; background: radial-gradient(circle at {}%% {}%%, #93c5fd, #3b82f6 50%%, #1e3a8a); border-radius: 50%%; box-shadow: 0 0 8px #3b82f6e5, 0 0 16px rgba(59,130,246,0.3), inset -1px -1px 3px #0000004c;", PLANET_DATA[2].1, PLANET_DATA[2].1, lxc, lyc) }></div>
         </div>
         {/* Mars */}
         <div class="absolute pointer-events-none" style=move || { let porbits = planet_angles.get(); let i = 3; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let r = PLANET_DATA[i].0; let x = 50.0 + r * angle.cos(); let y = 50.0 + r * angle.sin(); format!("left: {}%; top: {}%; transform: translate(-50%, -50%); z-index: 13;", x, y) }>
-            <div style=format!("width: {}px; height: {}px; background: radial-gradient(circle at 35%% 35%%, #fca5a5, #ef4444 50%%, #7f1d1d); border-radius: 50%%; box-shadow: 0 0 4px #ef4444cc, inset -1px -1px 2px #0000004c;", PLANET_DATA[3].1, PLANET_DATA[3].1)></div>
+            <div style=move || { let porbits = planet_angles.get(); let i = 3; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let lx = 50.0 + 25.0 * angle.cos(); let ly = 50.0 - 25.0 * angle.sin(); let lxc = lx.max(15.0).min(65.0); let lyc = ly.max(15.0).min(65.0); format!("width: {}px; height: {}px; background: radial-gradient(circle at {}%% {}%%, #fca5a5, #ef4444 50%%, #7f1d1d); border-radius: 50%%; box-shadow: 0 0 5px #ef4444cc, inset -1px -1px 2px #0000004c;", PLANET_DATA[3].1, PLANET_DATA[3].1, lxc, lyc) }></div>
         </div>
 
         {/* Asteroid Belt - scattered rocks */}
@@ -201,7 +203,7 @@ pub fn SolarSystem(
 
         {/* Jupiter - large with bands */}
         <div class="absolute pointer-events-none" style=move || { let porbits = planet_angles.get(); let i = 4; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let r = PLANET_DATA[i].0; let x = 50.0 + r * angle.cos(); let y = 50.0 + r * angle.sin(); format!("left: {}%; top: {}%; transform: translate(-50%, -50%); z-index: 14;", x, y) }>
-            <div style=format!("width: {}px; height: {}px; background: radial-gradient(circle at 35%% 35%%, #fcd34d, #f97316 50%%, #c2410c); border-radius: 50%%; box-shadow: 0 0 8px #f97316cc, inset -2px -2px 4px #0000004c;", PLANET_DATA[4].1, PLANET_DATA[4].1)></div>
+            <div style=move || { let porbits = planet_angles.get(); let i = 4; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let lx = 50.0 + 25.0 * angle.cos(); let ly = 50.0 - 25.0 * angle.sin(); let lxc = lx.max(15.0).min(65.0); let lyc = ly.max(15.0).min(65.0); format!("width: {}px; height: {}px; background: radial-gradient(circle at {}%% {}%%, #fcd34d, #f97316 50%%, #c2410c); border-radius: 50%%; box-shadow: 0 0 10px #f97316cc, inset -2px -2px 4px #0000004c;", PLANET_DATA[4].1, PLANET_DATA[4].1, lxc, lyc) }></div>
             {/* Jupiter band stripes */}
             <div class="jupiter-bands"></div>
             {/* Great Red Spot hint */}
@@ -209,21 +211,21 @@ pub fn SolarSystem(
         </div>
         {/* Saturn - with 3-layer rings */}
         <div class="absolute pointer-events-none" style=move || { let porbits = planet_angles.get(); let i = 5; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let r = PLANET_DATA[i].0; let x = 50.0 + r * angle.cos(); let y = 50.0 + r * angle.sin(); format!("left: {}%; top: {}%; transform: translate(-50%, -50%); z-index: 15;", x, y) }>
-            <div style=format!("width: {}px; height: {}px; background: radial-gradient(circle at 35%% 35%%, #fef9c3, #eab308 50%%, #a16207); border-radius: 50%%; box-shadow: 0 0 6px #eab308b2, inset -1px -1px 3px #0000004c;", PLANET_DATA[5].1, PLANET_DATA[5].1)></div>
+            <div style=move || { let porbits = planet_angles.get(); let i = 5; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let lx = 50.0 + 25.0 * angle.cos(); let ly = 50.0 - 25.0 * angle.sin(); let lxc = lx.max(15.0).min(65.0); let lyc = ly.max(15.0).min(65.0); format!("width: {}px; height: {}px; background: radial-gradient(circle at {}%% {}%%, #fef9c3, #eab308 50%%, #a16207); border-radius: 50%%; box-shadow: 0 0 8px #eab308b2, inset -1px -1px 3px #0000004c;", PLANET_DATA[5].1, PLANET_DATA[5].1, lxc, lyc) }></div>
             {/* Ring - outer faint */}
-            <div style=format!("position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-20deg); width: {}px; height: {}px; border: 2px {}; border-radius: 50%; opacity: 0.3; box-shadow: 0 0 3px #eab3084c;", PLANET_DATA[5].1 * 3.4, PLANET_DATA[5].1 * 0.85, "#d4a574")></div>
+            <div style=format!("position: absolute; left: 50%%; top: 50%%; transform: translate(-50%%, -50%%) rotate(-20deg); width: {}px; height: {}px; border: 2px {}; border-radius: 50%%; opacity: 0.3; box-shadow: 0 0 3px #eab3084c;", PLANET_DATA[5].1 * 3.4, PLANET_DATA[5].1 * 0.85, "#d4a574")></div>
             {/* Ring - middle */}
-            <div style=format!("position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-20deg); width: {}px; height: {}px; border: 2px {}; border-radius: 50%; opacity: 0.5; box-shadow: 0 0 5px #eab30866;", PLANET_DATA[5].1 * 2.8, PLANET_DATA[5].1 * 0.75, "#c0a060")></div>
+            <div style=format!("position: absolute; left: 50%%; top: 50%%; transform: translate(-50%%, -50%%) rotate(-20deg); width: {}px; height: {}px; border: 2px {}; border-radius: 50%%; opacity: 0.5; box-shadow: 0 0 5px #eab30866;", PLANET_DATA[5].1 * 2.8, PLANET_DATA[5].1 * 0.75, "#c0a060")></div>
             {/* Ring - inner bright */}
-            <div style=format!("position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-20deg); width: {}px; height: {}px; border: 2px {}; border-radius: 50%; opacity: 0.7; box-shadow: 0 0 8px #eab3087f;", PLANET_DATA[5].1 * 2.3, PLANET_DATA[5].1 * 0.65, "#eab308")></div>
+            <div style=format!("position: absolute; left: 50%%; top: 50%%; transform: translate(-50%%, -50%%) rotate(-20deg); width: {}px; height: {}px; border: 2px {}; border-radius: 50%%; opacity: 0.7; box-shadow: 0 0 8px #eab3087f;", PLANET_DATA[5].1 * 2.3, PLANET_DATA[5].1 * 0.65, "#eab308")></div>
         </div>
         {/* Uranus */}
         <div class="absolute pointer-events-none" style=move || { let porbits = planet_angles.get(); let i = 6; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let r = PLANET_DATA[i].0; let x = 50.0 + r * angle.cos(); let y = 50.0 + r * angle.sin(); format!("left: {}%; top: {}%; transform: translate(-50%, -50%); z-index: 16;", x, y) }>
-            <div style=format!("width: {}px; height: {}px; background: radial-gradient(circle at 35%% 35%%, #a5f3fc, #06b6d4 50%%, #0e7490); border-radius: 50%%; box-shadow: 0 0 5px #06b6d4cc, inset -1px -1px 3px #0000004c;", PLANET_DATA[6].1, PLANET_DATA[6].1)></div>
+            <div style=move || { let porbits = planet_angles.get(); let i = 6; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let lx = 50.0 + 25.0 * angle.cos(); let ly = 50.0 - 25.0 * angle.sin(); let lxc = lx.max(15.0).min(65.0); let lyc = ly.max(15.0).min(65.0); format!("width: {}px; height: {}px; background: radial-gradient(circle at {}%% {}%%, #a5f3fc, #06b6d4 50%%, #0e7490); border-radius: 50%%; box-shadow: 0 0 6px #06b6d4cc, inset -1px -1px 3px #0000004c;", PLANET_DATA[6].1, PLANET_DATA[6].1, lxc, lyc) }></div>
         </div>
         {/* Neptune */}
         <div class="absolute pointer-events-none" style=move || { let porbits = planet_angles.get(); let i = 7; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let r = PLANET_DATA[i].0; let x = 50.0 + r * angle.cos(); let y = 50.0 + r * angle.sin(); format!("left: {}%; top: {}%; transform: translate(-50%, -50%); z-index: 17;", x, y) }>
-            <div style=format!("width: {}px; height: {}px; background: radial-gradient(circle at 35%% 35%%, #a5b4fc, #6366f1 50%%, #4338ca); border-radius: 50%%; box-shadow: 0 0 6px #6366f1cc, inset -1px -1px 3px #0000004c;", PLANET_DATA[7].1, PLANET_DATA[7].1)></div>
+            <div style=move || { let porbits = planet_angles.get(); let i = 7; let angle = PLANET_INITIAL_ANGLES[i] + porbits[i]; let lx = 50.0 + 25.0 * angle.cos(); let ly = 50.0 - 25.0 * angle.sin(); let lxc = lx.max(15.0).min(65.0); let lyc = ly.max(15.0).min(65.0); format!("width: {}px; height: {}px; background: radial-gradient(circle at {}%% {}%%, #a5b4fc, #6366f1 50%%, #4338ca); border-radius: 50%%; box-shadow: 0 0 8px #6366f1cc, inset -1px -1px 3px #0000004c;", PLANET_DATA[7].1, PLANET_DATA[7].1, lxc, lyc) }></div>
         </div>
 
         {/* Moons */}

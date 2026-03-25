@@ -23,12 +23,12 @@ pub static SHIP_PLANET_ORBIT_RADIUS: f64 = 4.0;
 pub static MOON_DATA: &[&[(&str, f64, f64, &str)]] = &[
     &[], // Mercury - no moons
     &[], // Venus - no moons
-    &[("Luna", 3.0, 8.0, "#c0c0c0")], // Earth - Luna
-    &[("Phobos", 2.0, 5.0, "#8b7355"), ("Deimos", 1.5, 8.0, "#a0522d")], // Mars
-    &[("Io", 2.5, 6.0, "#ffff00"), ("Europa", 2.5, 10.0, "#f5deb3"), ("Ganymede", 3.5, 14.0, "#808080"), ("Callisto", 3.0, 18.0, "#4a4a4a")], // Jupiter - Galilean moons
-    &[("Titan", 4.0, 10.0, "#d4a574"), ("Enceladus", 1.5, 14.0, "#f0f0f0"), ("Mimas", 1.5, 16.0, "#c0c0c0"), ("Rhea", 2.0, 20.0, "#d3d3d3")], // Saturn
-    &[("Titania", 2.5, 15.0, "#808080"), ("Oberon", 2.5, 20.0, "#696969")], // Uranus
-    &[("Triton", 3.5, 12.0, "#87ceeb")], // Neptune - Triton
+    &[("Luna", 1.5, 8.0, "#c0c0c0")], // Earth - Luna
+    &[("Phobos", 1.0, 5.0, "#8b7355"), ("Deimos", 0.8, 8.0, "#a0522d")], // Mars
+    &[("Io", 1.2, 6.0, "#ffff00"), ("Europa", 1.0, 10.0, "#f5deb3"), ("Ganymede", 1.5, 14.0, "#808080"), ("Callisto", 1.2, 18.0, "#4a4a4a")], // Jupiter - Galilean moons
+    &[("Titan", 2.0, 10.0, "#d4a574"), ("Enceladus", 0.8, 14.0, "#f0f0f0"), ("Mimas", 0.7, 16.0, "#c0c0c0"), ("Rhea", 1.0, 20.0, "#d3d3d3")], // Saturn
+    &[("Titania", 1.2, 15.0, "#808080"), ("Oberon", 1.0, 20.0, "#696969")], // Uranus
+    &[("Triton", 1.5, 12.0, "#87ceeb")], // Neptune - Triton
 ];
 #[allow(dead_code)]
 pub static MOON_PERIODS: &[&[f64]] = &[
