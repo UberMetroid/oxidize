@@ -232,3 +232,52 @@ button {
     50% { transform: rotate(180deg) translateX(2px); }
     100% { transform: rotate(360deg) translateX(0px); }
 }
+
+/* Upgrade deployment animations */
+@keyframes sail-unfurl {
+    0% { transform: scale(0.1) rotate(-30deg); opacity: 0; }
+    20% { transform: scale(0.8) rotate(-10deg); opacity: 0.8; }
+    60% { transform: scale(1.1) rotate(5deg); opacity: 0.7; }
+    100% { transform: scale(1) rotate(0deg); opacity: 0; }
+}
+@keyframes plasma-zap {
+    0% { opacity: 1; filter: brightness(2); }
+    30% { opacity: 0.8; filter: brightness(1.5); }
+    60% { opacity: 1; filter: brightness(2); }
+    100% { opacity: 0; }
+}
+@keyframes mirror-spin {
+    0% { transform: scale(0) rotate(0deg); opacity: 0; }
+    30% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+    70% { transform: scale(1) rotate(360deg); opacity: 0.9; }
+    100% { transform: scale(0.8) rotate(400deg); opacity: 0; }
+}
+@keyframes dyson-assemble {
+    0% { transform: scale(0) rotate(0deg); opacity: 0; }
+    50% { transform: scale(1.2) rotate(90deg); opacity: 0.7; }
+    80% { transform: scale(0.95) rotate(180deg); opacity: 0.9; }
+    100% { transform: scale(1) rotate(180deg); opacity: 1; }
+}
+@keyframes quantum-glitch {
+    0%, 100% { transform: translate(0, 0) skewX(0deg); opacity: 0; }
+    10% { transform: translate(-2px, 1px) skewX(-5deg); opacity: 1; }
+    20% { transform: translate(2px, -1px) skewX(3deg); opacity: 0.8; }
+    30% { transform: translate(0, 0) skewX(0deg); opacity: 1; }
+    50% { transform: translate(1px, 2px) skewX(-2deg); opacity: 0.9; }
+    70% { transform: translate(-1px, 0) skewX(2deg); opacity: 1; }
+    100% { transform: translate(0, 0); opacity: 0; }
+}
+@keyframes stellar-flare {
+    0% { transform: scale(0); opacity: 0; }
+    15% { transform: scale(3); opacity: 1; }
+    30% { transform: scale(2.5); opacity: 0.9; }
+    100% { transform: scale(2.5); opacity: 0.7; }
+}
+@keyframes shockwave {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(8); opacity: 0; }
+}
+@keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0); }
+    50% { opacity: 1; transform: scale(1); }
+}

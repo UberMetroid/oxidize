@@ -14,7 +14,7 @@ use wasm_bindgen::JsCast;
 use constants::*;
 use helpers::{get_player_uuid, load_state, save_state};
 use solar_system::SolarSystem;
-use types::LaunchEffect;
+use types::UpgradeEffect;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -24,7 +24,7 @@ pub fn App() -> impl IntoView {
     let (state, set_state) = create_signal(initial_state);
     let (show_how_to_play, set_show_how_to_play) = create_signal(false);
     let (architect_message, set_architect_message) = create_signal(None as Option<String>);
-    let (launch_effects, set_launch_effects) = create_signal(Vec::new());
+    let (upgrade_effects, set_upgrade_effects) = create_signal(Vec::new());
     let (last_purchase_time, set_last_purchase_time) = create_signal(0u64);
 
     let (planet_angles, set_planet_angles) = create_signal(vec![0.0f64; 8]);
@@ -104,11 +104,17 @@ pub fn App() -> impl IntoView {
                     if *angle > 2.0 * PI { *angle -= 2.0 * PI; }
                 }
             });
-            set_launch_effects.update(|effects: &mut Vec<LaunchEffect>| {
+            set_upgrade_effects.update(|effects: &mut Vec<UpgradeEffect>| {
                 let current_time: f64 = js_sys::Date::now();
-                effects.retain_mut(|effect: &mut LaunchEffect| {
+                effects.retain_mut(|effect: &mut UpgradeEffect| {
                     let elapsed: f64 = (current_time - effect.start_time) / 1000.0;
-                    if elapsed < 3.0 { effect.progress = (elapsed / 3.0).min(1.0); effect.angle += 0.02; true } else { false }
+                    let duration = effect.duration_secs();
+                    if elapsed < duration || effect.permanent {
+                        effect.progress = (elapsed / duration).min(1.0);
+                        true
+                    } else {
+                        false
+                    }
                 });
             });
             // Track ship world position for engine trail
@@ -246,8 +252,8 @@ pub fn App() -> impl IntoView {
         set_state.update(|s| { s.buy_upgrade(upgrade, current_time); });
         set_last_purchase_time.set(current_time);
 
-        let new_effect = LaunchEffect::new(js_sys::Date::now() as u64, (ship_y - 50.0).atan2(ship_x - 50.0));
-        set_launch_effects.update(|effects: &mut Vec<LaunchEffect>| effects.push(new_effect));
+        let new_effect = UpgradeEffect::new(js_sys::Date::now() as u64, upgrade, ship_x, ship_y);
+        set_upgrade_effects.update(|effects: &mut Vec<UpgradeEffect>| effects.push(new_effect));
     };
 
     view! {
@@ -277,7 +283,7 @@ pub fn App() -> impl IntoView {
                     fly_x={fly_x}
                     fly_y={fly_y}
                     planet_offset={planet_offset}
-                    launch_effects={launch_effects}
+                    upgrade_effects={upgrade_effects}
                     trail_positions={trail_positions}
                 />
             </div>
