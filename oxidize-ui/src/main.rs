@@ -260,6 +260,7 @@ pub fn App() -> impl IntoView {
                     set_fly_vy.set(0.0);
                     set_is_flying.set(false);
                     set_is_arriving.set(true);
+                    set_arrival_time.set(js_sys::Date::now());
                     // Clear flight path after 3 seconds (handled in component)
                     if let Some(idx) = target_planet_idx.get() {
                         let porbits = planet_angles.get();
@@ -277,20 +278,13 @@ pub fn App() -> impl IntoView {
                 }
                 // Reset arriving flag after brief moment and fade flight path
                 if is_arriving.get() {
-                    let current_time = js_sys::Date::now() as f64;
-                    use std::sync::OnceLock;
-                    static ARRIVAL_START: OnceLock<f64> = OnceLock::new();
-                    if ARRIVAL_START.get().is_none() {
-                        ARRIVAL_START.set(current_time).ok();
-                    }
-                    if let Some(&start) = ARRIVAL_START.get() {
-                        if current_time - start > 300.0 {
-                            set_is_arriving.set(false);
-                            // Fade out flight path after arrival
-                            set_flight_path.update(|path: &mut Vec<(f64, f64)>| {
-                                path.clear();
-                            });
-                        }
+                    let elapsed = js_sys::Date::now() - arrival_time.get();
+                    if elapsed > 300.0 {
+                        set_is_arriving.set(false);
+                        // Fade out flight path after arrival
+                        set_flight_path.update(|path: &mut Vec<(f64, f64)>| {
+                            path.clear();
+                        });
                     }
                 }
                 set_spaceship_angle.update(|a| *a += 0.01);
